@@ -3,9 +3,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.coolbitx.sygna</groupId>
-	<artifactId>sygna-bridge-util</artifactId>
-	<version>0.1.0</version>
-	<name>sygna-bridge-util</name>
+	<artifactId>sygna-bridge-util-j</artifactId>
+	<version>0.1.1</version>
+	<name>sygna-bridge-util-j</name>
 	<properties>
 		<jdk.version>1.8</jdk.version>
 	</properties>
