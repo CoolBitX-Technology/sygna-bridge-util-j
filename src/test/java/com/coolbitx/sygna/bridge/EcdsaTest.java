@@ -10,7 +10,7 @@ import com.coolbitx.sygna.util.ECDSA;
 
 public class EcdsaTest {
 
-	private final static String PRV_KEY = "bf76d2680f23f6fc28111afe0179b8704c8e203a5faa5112f8aa52721f78fe6a";
+	private final static String PRV_KEY = "{{PRIVATE_KEY}}";
 	private final static String PUB_KEY = "045b409c8c15fd82744ce4f7f86d65f27d605d945d4c4eee0e4e2515a3894b9d157483cc5e49c62c07b46cd59bc980445d9cf987622d66df20c6c3634f6eb05085";
 	private final static String PUB_KEY_F = "04559d91b7e516e8d10ceac09611f58932b6b7481860c3ca75ead31bdc27e3910f2a88def59ba57a952b1e67529a47f28b36742a23150ecbc1ec45ed11407605c0";
 	

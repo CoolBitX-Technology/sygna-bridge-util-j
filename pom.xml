@@ -4,8 +4,14 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.coolbitx.sygna</groupId>
 	<artifactId>sygna-bridge-util-j</artifactId>
-	<version>0.1.1</version>
+	<version>0.1.5</version>
 	<name>sygna-bridge-util-j</name>
+	<developers>
+		<developer>
+			<name>Ray</name>
+			<email>ray@coolbitx.com</email>
+		</developer>
+	</developers>
 	<properties>
 		<jdk.version>1.8</jdk.version>
 	</properties>
@@ -22,8 +28,16 @@
 			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
-				<artifactId>maven-shade-plugin</artifactId>
-				<version>3.2.1</version>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>3.1.0</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar-no-fork</goal>
+						</goals>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>

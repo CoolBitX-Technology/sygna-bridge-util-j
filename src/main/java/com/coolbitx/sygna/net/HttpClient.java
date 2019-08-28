@@ -24,7 +24,7 @@ public class HttpClient {
 	public static JsonObject post(String url, JsonObject header, JsonObject postData, int timeout) throws Exception {
 		return fetch(url, RequestMethod.POST, header, postData, timeout);
 	}
-	
+
 	public static JsonObject get(String url, JsonObject header, int timeout) throws Exception {
 		return fetch(url, RequestMethod.GET, header, null, timeout);
 	}
@@ -64,28 +64,34 @@ public class HttpClient {
 				conn.setDoOutput(true);
 				conn.setRequestProperty("Content-Type", "application/json; charset=UTF-8");
 				OutputStreamWriter writer = new OutputStreamWriter(conn.getOutputStream());
-				writer.write(postData.toString());
+				String jsonStr = postData.toString();
+				writer.write(jsonStr);
 				writer.close();
 			} else {
 				throw new Exception("Unexpected HTTP Method:" + method.name());
 			}
 
 			int status = conn.getResponseCode();
-
-			System.out.printf("GET %s [%d]\n", url, status);
-			BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()));
+			System.out.printf("%s %s [%d]\n", method, url, status);
+			InputStreamReader isr;
+			if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
+				isr = new InputStreamReader(conn.getInputStream());
+			} else {
+				isr = new InputStreamReader(conn.getErrorStream());
+			}
+			BufferedReader br = new BufferedReader(isr);
 			StringBuilder sb = new StringBuilder();
 			String line;
 			while ((line = br.readLine()) != null) {
 				sb.append(line + "\n");
 			}
 			br.close();
-			if (status == HttpURLConnection.HTTP_OK || status == HttpURLConnection.HTTP_CREATED) {
+			try {
 				result = new Gson().fromJson(sb.toString(), JsonObject.class);
-			} else {
-				System.out.println(sb.toString());
+			} catch (Exception ex) {
+				System.out.println("Json parse target:" + sb.toString());
+				throw ex;
 			}
-
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		} catch (IOException e) {
