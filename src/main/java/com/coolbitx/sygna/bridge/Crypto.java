@@ -3,6 +3,7 @@ package com.coolbitx.sygna.bridge;
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.util.DateUtils;
 import com.coolbitx.sygna.util.ECDSA;
 import com.coolbitx.sygna.util.ECIES;
 import com.google.gson.Gson;
@@ -55,6 +56,29 @@ public class Crypto {
 		obj.addProperty(Field.DATA_DT, dataDt);
 		return signObject(obj, privateKey);
 	}
+	
+	/**
+	 * 
+	 * @param privateInfo
+	 * @param transaction
+	 * @param dataDt      TimeStamp in ISO format: yyyy-mm-ddThh:mm:ss[.mmm]+0000
+	 * @param expireDate  epoch timestamp in milliseconds
+	 * @param privateKey
+	 * @return { {@link Field#PRIVATE_INFO}: {@link String},
+	 *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
+	 *         {@link String} }
+	 * @throws Exception
+	 */
+	public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
+			String privateKey, long expireDate) throws Exception {
+		JsonObject obj = new JsonObject();
+		obj.addProperty(Field.PRIVATE_INFO, privateInfo);
+		obj.add(Field.TRANSACTION, transaction);
+		obj.addProperty(Field.DATA_DT, dataDt);
+		DateUtils.checkExpireDateValid(expireDate);
+		obj.addProperty(Field.EXPIRE_DATE, expireDate);
+		return signObject(obj, privateKey);
+	}
 
 	/**
 	 * @param callbackUrl
@@ -82,6 +106,26 @@ public class Crypto {
 		JsonObject obj = new JsonObject();
 		obj.addProperty(Field.TRANSFER_ID, transferId);
 		obj.addProperty(Field.PERMISSION_STATUS, permissionStatus);
+		return signObject(obj, privateKey);
+	}
+	
+	/**
+	 * @param transferId
+	 * @param permissionStatus
+	 * @param privateKey
+	 * @param expireDate epoch timestamp in milliseconds
+	 * @return { {@link Field#TRANSFER_ID}: {@link String},
+	 *         {@link Field#PERMISSION_STATUS}: {@link String},
+	 *         {@link Field#FIELD_SIGNATURE: {@link String} }
+	 * @throws Exception
+	 */
+	public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate)
+			throws Exception {
+		JsonObject obj = new JsonObject();
+		obj.addProperty(Field.TRANSFER_ID, transferId);
+		obj.addProperty(Field.PERMISSION_STATUS, permissionStatus);
+		DateUtils.checkExpireDateValid(expireDate);
+		obj.addProperty(Field.EXPIRE_DATE, expireDate);
 		return signObject(obj, privateKey);
 	}
 

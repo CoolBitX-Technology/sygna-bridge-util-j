@@ -1,5 +1,6 @@
 package com.coolbitx.sygna.bridge.model;
 
+import com.coolbitx.sygna.util.DateUtils;
 import com.google.gson.JsonObject;
 
 public class PermissionRequest extends Packet {
@@ -10,10 +11,19 @@ public class PermissionRequest extends Packet {
 		this.transaction = transaction;
 		this.data_dt = data_dt;
 	}
+	
+	public PermissionRequest(String signature, String private_info, JsonObject transaction, String data_dt,long expire_date) {
+		super(signature);
+		this.private_info = private_info;
+		this.transaction = transaction;
+		this.data_dt = data_dt;
+		this.expire_date = expire_date;
+	}
 
 	private String private_info;
 	private JsonObject transaction;
 	private String data_dt;
+	private long expire_date = 0l;
 
 	public String getPrivate_info() {
 		return private_info;
@@ -26,5 +36,15 @@ public class PermissionRequest extends Packet {
 	public String getData_dt() {
 		return data_dt;
 	}
+	public long getExpire_date() {
+		return expire_date;
+	}
+	@Override
+	public void check() throws Exception {
+		super.check();
+		if(this.expire_date != 0l) {
+			DateUtils.checkExpireDateValid(this.expire_date);
+		}
+	} 
 
 }

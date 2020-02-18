@@ -9,4 +9,5 @@ public abstract class Field {
 	public final static String PRIVATE_INFO = "private_info";
 	public final static String TRANSACTION = "transaction";
 	public final static String DATA_DT = "data_dt";
+	public final static String EXPIRE_DATE = "expire_date";
 }
