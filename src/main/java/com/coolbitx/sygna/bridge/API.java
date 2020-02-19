@@ -10,8 +10,10 @@ import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.bridge.model.VaspDetail;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.PacketSerializer;
 import com.coolbitx.sygna.net.HttpClient;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import static java.lang.String.format;
 
@@ -106,7 +108,8 @@ public class API {
 	public JsonObject postPermission(Permission perm) throws Exception {
 		perm.check();
 		final String url = this.domain + "api/v1/bridge/transaction/permission";
-		return postSB(url, (JsonObject) new Gson().toJsonTree(perm, Permission.class));
+		Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PacketSerializer()).create();
+		return postSB(url, (JsonObject) gson.toJsonTree(perm,Permission.class));
 	}
 
 	/**
@@ -134,9 +137,10 @@ public class API {
 		permReq.check();
 		callback.check();
 		final String url = this.domain + "api/v1/bridge/transaction/permission-request";
+		Gson gson = new GsonBuilder().registerTypeAdapter(PermissionRequest.class, new PacketSerializer()).create();
 		JsonObject obj = new JsonObject();
-		obj.add("data", new Gson().toJsonTree(permReq, PermissionRequest.class));
-		obj.add("callback", new Gson().toJsonTree(callback, Callback.class));
+		obj.add("data", gson.toJsonTree(permReq, PermissionRequest.class));
+		obj.add("callback", gson.toJsonTree(callback, Callback.class));
 		return postSB(url, obj);
 	}
 
