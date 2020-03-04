@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
+import com.coolbitx.sygna.bridge.enums.PermissionStatus;
 import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Permission;
 import com.coolbitx.sygna.bridge.model.PermissionRequest;
@@ -78,6 +79,7 @@ public class ApiTest {
 		final String status = "ACCEPTED";
 		final String transferId = "7b70c6f935441941695af5033435941cacc909685669df73628e5c68e32f231f";
 		final String signature = "cb93bb7add0a7475244870e54c5bf119eb642263cd07b1c5b91e3e14dca5f54f71d99e9e6a0387c88a7f1cbc3fd0932111cbbb5040f2b59986382ab03a3adf42";
+		
 		Permission perm = new Permission(signature, transferId, status);
 		JsonObject obj = API_UTIL.postPermission(perm);
 		System.out.println("return:" + obj.toString());

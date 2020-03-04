@@ -10,4 +10,6 @@ public abstract class Field {
 	public final static String TRANSACTION = "transaction";
 	public final static String DATA_DT = "data_dt";
 	public final static String EXPIRE_DATE = "expire_date";
+	public final static String REJECT_CODE = "reject_code";
+	public final static String REJECT_MESSAGE = "reject_message";
 }

@@ -1,7 +1,8 @@
 package com.coolbitx.sygna.bridge.model;
 
-import com.coolbitx.sygna.util.DateUtils;
+import com.coolbitx.sygna.util.Validator;
 import com.google.gson.JsonObject;
+import java.util.Calendar;
 
 public class PermissionRequest extends Packet {
 
@@ -42,9 +43,9 @@ public class PermissionRequest extends Packet {
 	@Override
 	public void check() throws Exception {
 		super.check();
-		if(this.expire_date != 0l) {
-			DateUtils.checkExpireDateValid(this.expire_date);
-		}
+                Validator.validatePrivateInfo(private_info);
+                Validator.validateTransactionSchema(transaction);
+		Validator.validateExpireDate(Calendar.getInstance(),expire_date);
 	} 
 
 }

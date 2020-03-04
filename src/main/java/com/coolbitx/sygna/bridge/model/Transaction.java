@@ -1,5 +1,7 @@
 package com.coolbitx.sygna.bridge.model;
 
+import com.coolbitx.sygna.util.Validator;
+
 public class Transaction extends Packet {
 
 	private String transfer_id;
@@ -17,6 +19,13 @@ public class Transaction extends Packet {
 
 	public String getTxid() {
 		return txid;
+	}
+	
+	@Override
+	public void check() throws Exception {
+		super.check();
+		Validator.validateTransferId(transfer_id);
+		Validator.validateTxId(txid);
 	}
 
 }

@@ -1,5 +1,7 @@
 package com.coolbitx.sygna.bridge.model;
 
+import com.coolbitx.sygna.util.Validator;
+
 public abstract class Packet {
 	private String signature;
 
@@ -9,9 +11,7 @@ public abstract class Packet {
 	}
 
 	public void check() throws Exception {
-		if (this.signature == null || this.signature.length() != 128) {
-			throw new Exception("Expect signature length to be 128.");
-		}
+		Validator.validateSignature(signature);
 	}
 
 	public String getSignature() {
