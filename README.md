@@ -1,6 +1,6 @@
 # Sygna Bridge Util Java (sygna-bridge-util-j)
 
-This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information about Sygna Bridge, please go through the [Official Sygna Bridge API Document](https://coolbitx.gitlab.io/sygna/bridge/api/#sygna-bridge).
+This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information, please see [Sygna Bridge](https://www.sygna.io/).
 
 ## Build Jar
 
@@ -76,7 +76,7 @@ valid = Crypto.verifyObject(signedObj, originatorPublicKey);
 
 ```
 
-We provide different methods like `signPermissionRequest`, `signCallback()` to sign different objects(or parameters) we specified in our [api doc](https://coolbitx.gitlab.io/sygna/bridge/api/#custom-objects). You can also find more examples in the following section.
+We provide different methods like `signPermissionRequest`, `signCallback()` to sign different objects(or parameters) we specified in our api doc. You can also find more examples in the following section.
 
 ## API
 
@@ -170,4 +170,4 @@ String finalresult = API_UTIL.postPermission(permissionObj);
 
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/) to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
