@@ -7,6 +7,8 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.coolbitx.sygna.util.Validator;
+import java.net.MalformedURLException;
+import java.text.ParseException;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -251,7 +253,7 @@ public class ValidatorTest {
         String expectedErrorMessage = "txid length should NOT be shorter than 1";
         try {
             String txid = null;
-            Validator.validateTxId(txid);
+            Validator.validateTxid(txid);
             fail("expected exception was not occured.");
         } catch (Exception e) {
             assertEquals(e.getMessage(), expectedErrorMessage);
@@ -259,7 +261,7 @@ public class ValidatorTest {
 
         try {
             String txid = "";
-            Validator.validateTxId(txid);
+            Validator.validateTxid(txid);
             fail("expected exception was not occured.");
         } catch (Exception e) {
             assertEquals(e.getMessage(), expectedErrorMessage);
@@ -267,7 +269,7 @@ public class ValidatorTest {
 
         try {
             String txid = "1234";
-            Validator.validateTxId(txid);
+            Validator.validateTxid(txid);
         } catch (Exception e) {
             fail("Should not have thrown any exception");
         }
@@ -295,6 +297,105 @@ public class ValidatorTest {
         try {
             String privateInfo = "1234";
             Validator.validatePrivateInfo(privateInfo);
+        } catch (Exception e) {
+            fail("unexpected exception was occured.");
+        }
+    }
+
+    @Test
+    public void testValidateDataDate() {
+
+        try {
+            String dataDate = null;
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "dataDate length should NOT be shorter than 1");
+        }
+
+        try {
+            String dataDate = "";
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "dataDate length should NOT be shorter than 1");
+        }
+
+        try {
+            String dataDate = "123";
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isParseException = (e instanceof ParseException);
+            assertEquals(isParseException, true);
+        }
+
+        try {
+            String dataDate = "2019/07/29 06:29:00";
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isParseException = (e instanceof ParseException);
+            assertEquals(isParseException, true);
+        }
+
+        try {
+            String dataDate = "2019-07-29 06:29:00";
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isParseException = (e instanceof ParseException);
+            assertEquals(isParseException, true);
+        }
+
+        try {
+            String dataDate = "2019-07-29T06:29:00.000";
+            Validator.validateDataDate(dataDate);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isParseException = (e instanceof ParseException);
+            assertEquals(isParseException, true);
+        }
+
+        try {
+            String dataDate = "2019-07-29T06:29:00.123Z";
+            Validator.validateDataDate(dataDate);
+        } catch (Exception e) {
+            fail("unexpected exception was occured.");
+        }
+    }
+    
+        @Test
+    public void testValidateUrl() {
+
+        try {
+            String url = null;
+            Validator.validateUrl(url);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "url length should NOT be shorter than 1");
+        }
+
+        try {
+            String url = "";
+            Validator.validateUrl(url);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "url length should NOT be shorter than 1");
+        }
+
+        try {
+            String url = "123";
+            Validator.validateUrl(url);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isMalformedURLException = (e instanceof MalformedURLException);
+            assertEquals(isMalformedURLException, true);
+        }
+
+        try {
+            String url = "https://google.com";
+            Validator.validateUrl(url);
         } catch (Exception e) {
             fail("unexpected exception was occured.");
         }

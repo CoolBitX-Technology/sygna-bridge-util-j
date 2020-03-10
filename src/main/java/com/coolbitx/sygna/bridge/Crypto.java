@@ -94,6 +94,7 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception {
+        Validator.validateUrl(callbackUrl);
         JsonObject obj = new JsonObject();
         obj.addProperty(Field.CALL_BACK_URL, callbackUrl);
         return signObject(obj, privateKey);
@@ -127,6 +128,40 @@ public class Crypto {
     public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate)
             throws Exception {
         return signPermission(transferId, permissionStatus, privateKey, expireDate, RejectCode.NULL, null);
+    }
+
+    /**
+     * @param transferId
+     * @param permissionStatus
+     * @param privateKey
+     * @param rejectCode
+     * @return { {@link Field#TRANSFER_ID}: {@link String},
+     *         {@link Field#PERMISSION_STATUS}: {@link String},
+     *         {@link Field#REJECT_CODE}: {@link String},
+     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, RejectCode rejectCode)
+            throws Exception {
+        return signPermission(transferId, permissionStatus, privateKey, 0l, rejectCode, null);
+    }
+
+    /**
+     * @param transferId
+     * @param permissionStatus
+     * @param privateKey
+     * @param expireDate epoch timestamp in milliseconds
+     * @param rejectCode
+     * @return { {@link Field#TRANSFER_ID}: {@link String},
+     *         {@link Field#PERMISSION_STATUS}: {@link String},
+     *         {@link Field#EXPIRE_DATE}: {@link long},
+     *         {@link Field#REJECT_CODE}: {@link String},
+     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode)
+            throws Exception {
+        return signPermission(transferId, permissionStatus, privateKey, expireDate, rejectCode, null);
     }
 
     /**
@@ -193,7 +228,7 @@ public class Crypto {
      */
     public static JsonObject signTxId(String transferId, String txId, String privateKey) throws Exception {
         Validator.validateTransferId(transferId);
-        Validator.validateTxId(txId);
+        Validator.validateTxid(txId);
         JsonObject obj = new JsonObject();
         obj.addProperty(Field.TRANSFER_ID, transferId);
         obj.addProperty(Field.TX_ID, txId);

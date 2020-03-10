@@ -8,7 +8,8 @@ import org.junit.runners.Suite;
 import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
-@SuiteClasses({ EcdsaTest.class })
+@SuiteClasses({ ApiTest.class, CryptoTest.class, EcdsaTest.class, 
+    EciesTest.class, PacketSerializerTest.class, ValidateTransactionSchemaTest.class, ValidatorTest.class })
 public class AllTests {
 	public static void main(String[] args) {
 		Result result = JUnitCore.runClasses(AllTests.class);
