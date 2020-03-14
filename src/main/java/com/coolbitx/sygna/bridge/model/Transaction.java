@@ -25,7 +25,7 @@ public class Transaction extends Packet {
 	public void check() throws Exception {
 		super.check();
 		Validator.validateTransferId(transfer_id);
-		Validator.validateTxId(txid);
+		Validator.validateTxid(txid);
 	}
 
 }
