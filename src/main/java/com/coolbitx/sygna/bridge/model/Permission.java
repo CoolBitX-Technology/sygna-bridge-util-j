@@ -88,11 +88,13 @@ public class Permission extends Packet {
     @Override
     public void check() throws Exception {
         super.check();
+        checkSignData();
+    }
+
+    public void checkSignData() throws Exception {
         Validator.validateTransferId(transfer_id);
         Validator.validatePermissionStatus(permission_status);
         Validator.validateExpireDate(Calendar.getInstance(), expire_date);
         Validator.validateRejectData(permission_status, rejectCode, rejectMessage);
-
     }
-
 }
