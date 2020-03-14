@@ -71,11 +71,11 @@ public class CryptoTest {
         isVerified = Crypto.verifyObject(signedObj, PUBLIC_KEY);
         assertEquals(isVerified, true);
     }
-    
+
     @Test
     public void testCallback() throws Exception {
         JsonObject signedObj = Crypto.signCallBack(CALLBACK_URL, PRIVATE_KEY);
-        System.out.print(String.format("test_callback = %s",signedObj.toString()));
+        System.out.print(String.format("test_callback = %s", signedObj.toString()));
     }
 
 }
