@@ -14,11 +14,15 @@ public class Callback extends Packet {
     public String getCallback_url() {
         return callback_url;
     }
+
     @Override
     public void check() throws Exception {
         super.check();
+        checkSignData();
+    }
+
+    public void checkSignData() throws Exception {
         Validator.validateUrl(callback_url);
-    }  
-    
+    }
 
 }

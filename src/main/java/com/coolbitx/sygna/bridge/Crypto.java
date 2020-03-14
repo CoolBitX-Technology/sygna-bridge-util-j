@@ -1,11 +1,13 @@
 package com.coolbitx.sygna.bridge;
 
 import com.coolbitx.sygna.bridge.enums.RejectCode;
+import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.bridge.model.Permission;
 import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.CallbackSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
 import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.util.ECDSA;
@@ -96,12 +98,23 @@ public class Crypto {
      * @return { {@link Field#CALL_BACK_URL}: {@link String} }
      * @throws Exception
      */
-    public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception {
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.CALL_BACK_URL, callbackUrl);
-        return signObject(obj, privateKey);
+    public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception { 
+        Callback callback = new Callback(null,callbackUrl);;
+        return signCallBack(callback,privateKey);
     }
 
+    /**
+     * @param callback
+     * @param privateKey
+     * @return { {@link Field#CALL_BACK_URL}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signCallBack(Callback callback, String privateKey) throws Exception {
+        callback.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Callback.class, new CallbackSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(callback, Callback.class);
+        return signObject(obj, privateKey);
+    }
     /**
      * @param transferId
      * @param permissionStatus
@@ -299,5 +312,4 @@ public class Crypto {
         System.out.printf("Message:\n%s\n", msg);
         return ECDSA.verify(msg, signature, publicKey);
     }
-
 }

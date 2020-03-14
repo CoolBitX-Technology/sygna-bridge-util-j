@@ -10,6 +10,7 @@ import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.bridge.model.VaspDetail;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.CallbackSerializer;
 import com.coolbitx.sygna.json.PacketSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
 import com.coolbitx.sygna.json.TransactionSerializer;
@@ -139,7 +140,10 @@ public class API {
         permReq.check();
         callback.check();
         final String url = this.domain + "api/v1/bridge/transaction/permission-request";
-        Gson gson = new GsonBuilder().registerTypeAdapter(PermissionRequest.class, new PacketSerializer()).create();
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(PermissionRequest.class, new PacketSerializer())
+                .registerTypeAdapter(Callback.class, new CallbackSerializer())
+                .create();
         JsonObject obj = new JsonObject();
         obj.add("data", gson.toJsonTree(permReq, PermissionRequest.class));
         obj.add("callback", gson.toJsonTree(callback, Callback.class));
