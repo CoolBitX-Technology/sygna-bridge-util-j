@@ -11,6 +11,7 @@ import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.bridge.model.VaspDetail;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.coolbitx.sygna.json.PacketSerializer;
+import com.coolbitx.sygna.json.PermissionSerializer;
 import com.coolbitx.sygna.net.HttpClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -108,7 +109,7 @@ public class API {
     public JsonObject postPermission(Permission perm) throws Exception {
         perm.check();
         final String url = this.domain + "api/v1/bridge/transaction/permission";
-        Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PacketSerializer()).create();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PermissionSerializer()).create();
         return postSB(url, (JsonObject) gson.toJsonTree(perm, Permission.class));
     }
 
