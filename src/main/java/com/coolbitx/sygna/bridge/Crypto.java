@@ -193,7 +193,7 @@ public class Crypto {
      */
     public static JsonObject signTxId(String transferId, String txId, String privateKey) throws Exception {
         Validator.validateTransferId(transferId);
-        Validator.validateTxId(txId);
+        Validator.validateTxid(txId);
         JsonObject obj = new JsonObject();
         obj.addProperty(Field.TRANSFER_ID, transferId);
         obj.addProperty(Field.TX_ID, txId);
@@ -209,6 +209,7 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signObject(JsonObject obj, String privateKey) throws Exception {
+        Validator.validatePrivateKey(privateKey);
         obj.addProperty(Field.SIGNATURE, "");
         Gson gson = new Gson();
         final String signature = ECDSA.sign(gson.toJson(obj), privateKey);

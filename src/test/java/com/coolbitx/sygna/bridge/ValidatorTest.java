@@ -364,8 +364,8 @@ public class ValidatorTest {
             fail("unexpected exception was occured.");
         }
     }
-    
-        @Test
+
+    @Test
     public void testValidateUrl() {
 
         try {
@@ -396,6 +396,33 @@ public class ValidatorTest {
         try {
             String url = "https://google.com";
             Validator.validateUrl(url);
+        } catch (Exception e) {
+            fail("unexpected exception was occured.");
+        }
+    }
+
+    @Test
+    public void testValidatePrivateKey() {
+        String expectedErrorMessage = "privateKey length should NOT be shorter than 1";
+        try {
+            String privateKey = null;
+            Validator.validatePrivateKey(privateKey);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            String privateKey = "";
+            Validator.validatePrivateKey(privateKey);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            String privateKey = "1234";
+            Validator.validatePrivateKey(privateKey);
         } catch (Exception e) {
             fail("unexpected exception was occured.");
         }
