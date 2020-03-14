@@ -12,6 +12,7 @@ import com.coolbitx.sygna.bridge.model.VaspDetail;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.coolbitx.sygna.json.PacketSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
+import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.net.HttpClient;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -154,8 +155,9 @@ public class API {
      */
     public JsonObject postTransactionId(Transaction tx) throws Exception {
         tx.check();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Transaction.class, new TransactionSerializer()).create();
         final String url = this.domain + "api/v1/bridge/transaction/txid";
-        return postSB(url, (JsonObject) new Gson().toJsonTree(tx, Transaction.class));
+        return postSB(url, (JsonObject) gson.toJsonTree(tx, Transaction.class));
     }
 
     /**

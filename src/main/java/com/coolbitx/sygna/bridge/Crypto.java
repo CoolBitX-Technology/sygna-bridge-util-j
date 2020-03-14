@@ -3,9 +3,11 @@ package com.coolbitx.sygna.bridge;
 import com.coolbitx.sygna.bridge.enums.RejectCode;
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.bridge.model.Permission;
+import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.coolbitx.sygna.json.PermissionSerializer;
+import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.util.ECDSA;
 import com.coolbitx.sygna.util.ECIES;
 import com.coolbitx.sygna.util.Validator;
@@ -199,10 +201,10 @@ public class Crypto {
      */
     public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode, String rejectMessage)
             throws Exception {
-        Permission permission = new Permission(null,transferId,permissionStatus,expireDate,rejectCode,rejectMessage);
-        return signPermission(permission,privateKey);
+        Permission permission = new Permission(null, transferId, permissionStatus, expireDate, rejectCode, rejectMessage);
+        return signPermission(permission, privateKey);
     }
-    
+
     /**
      * @param permission
      * @param privateKey
@@ -214,7 +216,7 @@ public class Crypto {
      *         {@link Field#FIELD_SIGNATURE: {@link String} }
      * @throws Exception
      */
-    public static JsonObject signPermission(Permission permission,String privateKey)
+    public static JsonObject signPermission(Permission permission, String privateKey)
             throws Exception {
         permission.checkSignData();
         Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PermissionSerializer()).create();
@@ -231,11 +233,21 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signTxId(String transferId, String txId, String privateKey) throws Exception {
-        Validator.validateTransferId(transferId);
-        Validator.validateTxid(txId);
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.TRANSFER_ID, transferId);
-        obj.addProperty(Field.TX_ID, txId);
+        Transaction transaction = new Transaction(transferId, txId, null);
+        return signTxId(transaction, privateKey);
+    }
+
+    /**
+     * @param transaction
+     * @param privateKey
+     * @return { {@link Field#TRANSFER_ID}: {@link String}, {@link Field#TX_ID}:
+     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signTxId(Transaction transaction, String privateKey) throws Exception {
+        transaction.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Transaction.class, new TransactionSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(transaction, Transaction.class);
         return signObject(obj, privateKey);
     }
 
@@ -257,7 +269,7 @@ public class Crypto {
     }
 
     /**
-     * {@code publicKey} defaults to null null null null null null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
+     * {@code publicKey} defaults to null null null null null null null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
 	 *
      * {@link Crypto#verifyObject(JsonObject, String)}
      *
