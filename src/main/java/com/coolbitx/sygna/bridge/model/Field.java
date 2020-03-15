@@ -13,4 +13,12 @@ public abstract class Field {
     public final static String EXPIRE_DATE = "expire_date";
     public final static String REJECT_CODE = "reject_code";
     public final static String REJECT_MESSAGE = "reject_message";
+    public final static String ORIGINATOR_VASP_CODE = "originator_vasp_code";
+    public final static String ORIGINATOR_ADDRS = "originator_addrs";
+    public final static String ORIGINATOR_ADDRS_EXTRA = "originator_addrs_extra";
+    public final static String BENEFICIARY_VASP_CODE = "beneficiary_vasp_code";
+    public final static String BENEFICIARY_ADDRS = "beneficiary_addrs";
+    public final static String BENEFICIARY_ADDRS_EXTRA = "beneficiary_addrs_extra";
+    public final static String TRANSACTION_CURRENCY = "transaction_currency";
+    public final static String AMOUNT = "amount";
 }

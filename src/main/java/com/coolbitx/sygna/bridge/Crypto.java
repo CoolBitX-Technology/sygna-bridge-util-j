@@ -4,10 +4,12 @@ import com.coolbitx.sygna.bridge.enums.RejectCode;
 import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.bridge.model.Permission;
+import com.coolbitx.sygna.bridge.model.PermissionRequest;
 import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.coolbitx.sygna.json.CallbackSerializer;
+import com.coolbitx.sygna.json.PermissionRequestSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
 import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.util.ECDSA;
@@ -76,19 +78,23 @@ public class Crypto {
      */
     public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
             String privateKey, long expireDate) throws Exception {
-        Validator.validatePrivateInfo(privateInfo);
-        Validator.validateTransactionSchema(transaction);
-        Validator.validateExpireDate(Calendar.getInstance(), expireDate);
+        PermissionRequest permissionRequest = new PermissionRequest(null,privateInfo,transaction,dataDt,expireDate);
+        return signPermissionRequest(permissionRequest,privateKey);
+    }
 
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.PRIVATE_INFO, privateInfo);
-        obj.add(Field.TRANSACTION, transaction);
-        obj.addProperty(Field.DATA_DT, dataDt);
-
-        if (expireDate != 0l) {
-            obj.addProperty(Field.EXPIRE_DATE, expireDate);
-        }
-
+    /**
+     * @param permissionRequest
+     * @param privateKey
+     * @return { {@link Field#PRIVATE_INFO}: {@link String},
+     *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
+     *         {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermissionRequest(PermissionRequest permissionRequest,
+            String privateKey) throws Exception {
+        permissionRequest.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(PermissionRequest.class, new PermissionRequestSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(permissionRequest, PermissionRequest.class);
         return signObject(obj, privateKey);
     }
 
@@ -98,9 +104,9 @@ public class Crypto {
      * @return { {@link Field#CALL_BACK_URL}: {@link String} }
      * @throws Exception
      */
-    public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception { 
-        Callback callback = new Callback(null,callbackUrl);;
-        return signCallBack(callback,privateKey);
+    public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception {
+        Callback callback = new Callback(null, callbackUrl);;
+        return signCallBack(callback, privateKey);
     }
 
     /**
@@ -115,6 +121,7 @@ public class Crypto {
         JsonObject obj = (JsonObject) gson.toJsonTree(callback, Callback.class);
         return signObject(obj, privateKey);
     }
+
     /**
      * @param transferId
      * @param permissionStatus
@@ -282,7 +289,8 @@ public class Crypto {
     }
 
     /**
-     * {@code publicKey} defaults to null null null null null null null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
+     * {@code publicKey} defaults to null null null null null null null null
+     * null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
 	 *
      * {@link Crypto#verifyObject(JsonObject, String)}
      *
