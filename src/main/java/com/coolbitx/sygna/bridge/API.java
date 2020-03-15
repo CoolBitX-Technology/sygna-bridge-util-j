@@ -11,7 +11,6 @@ import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.bridge.model.VaspDetail;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.coolbitx.sygna.json.CallbackSerializer;
-import com.coolbitx.sygna.json.PacketSerializer;
 import com.coolbitx.sygna.json.PermissionRequestSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
 import com.coolbitx.sygna.json.TransactionSerializer;
