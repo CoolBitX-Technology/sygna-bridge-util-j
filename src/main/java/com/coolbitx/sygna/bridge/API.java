@@ -33,26 +33,42 @@ public class API {
 
     /**
      * {@code validate} defaults to {@link Boolean#TRUE}
+     * {@code isProd} defaults to {@link Boolean#FALSE}
      *
-     * @see API#getVASPPublicKey(String, boolean)
+     * @see API#getVASPPublicKey(String, boolean, boolean)
      *
      * @param vaspCode
      * @return
      * @throws Exception
      */
     public String getVASPPublicKey(String vaspCode) throws Exception {
-        return getVASPPublicKey(vaspCode, true);
+        return getVASPPublicKey(vaspCode, true, false);
     }
 
     /**
+     * {@code isProd} defaults to {@link Boolean#FALSE}
+     *
+     * @see API#getVASPPublicKey(String, boolean, boolean)
+     *
+     * @param vaspCode
+     * @param validate whether to validate returned vasp list data.
+     * @return
+     * @throws Exception
+     */
+    public String getVASPPublicKey(String vaspCode, boolean validate) throws Exception {
+        return getVASPPublicKey(vaspCode, validate, false);
+    }
+    
+        /**
      * A Wrapper function of getVASPList to return specific VASP's Public Key.
      *
      * @param vaspCode
      * @param validate whether to validate returned vasp list data.
+     * @param isProd environment is production or test
      * @return uncompressed Public Key
      * @throws Exception
      */
-    public String getVASPPublicKey(String vaspCode, boolean validate) throws Exception {
+    public String getVASPPublicKey(String vaspCode, boolean validate,boolean isProd) throws Exception {
         final ArrayList<VaspDetail> vasps = getVASPList(validate);
         for (VaspDetail item : vasps) {
             if (vaspCode.equals(item.getVasp_code())) {
@@ -64,24 +80,40 @@ public class API {
 
     /**
      * {@code validate} defaults to {@link Boolean#TRUE}
+     * {@code isProd} defaults to {@link Boolean#FALSE}
      *
-     * @see API#getVASPList(boolean)
+     * @see API#getVASPList(boolean, boolean)
      *
      * @return
      * @throws Exception
      */
     public ArrayList<VaspDetail> getVASPList() throws Exception {
-        return getVASPList(true);
+        return getVASPList(true,false);
     }
 
     /**
-     * Get list of registered VASP associated with publicKey.
+     * {@code isProd} defaults to {@link Boolean#FALSE}
      *
+     * @see API#getVASPList(boolean, boolean)
+     * 
      * @param validate whether to validate returned vasp list data.
+     *
      * @return
      * @throws Exception
      */
     public ArrayList<VaspDetail> getVASPList(boolean validate) throws Exception {
+        return getVASPList(validate,false);
+    }
+    
+        /**
+     * Get list of registered VASP associated with publicKey.
+     *
+     * @param validate whether to validate returned vasp list data.
+     * @param isProd environment is production or test
+     * @return
+     * @throws Exception
+     */
+    public ArrayList<VaspDetail> getVASPList(boolean validate, boolean isProd) throws Exception {
         final String url = this.domain + "api/v1/bridge/vasp";
         Gson gson = new Gson();
         JsonObject obj = getSB(url);
@@ -93,7 +125,7 @@ public class API {
         if (!validate) {
             return result.getVasp_data();
         }
-        final boolean valid = Crypto.verifyObject(obj, BridgeConfig.SYGNA_BRIDGE_CENTRAL_PUBKEY);
+        final boolean valid = Crypto.verifyObject(obj, isProd ? BridgeConfig.SYGNA_BRIDGE_CENTRAL_PUBKEY : BridgeConfig.SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST);
         if (!valid) {
             throw new Exception(format("get VASP info error: invalid signature."));
         }
