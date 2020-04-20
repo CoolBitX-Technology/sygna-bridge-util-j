@@ -7,6 +7,9 @@ import com.coolbitx.sygna.bridge.enums.RejectCode;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.google.gson.JsonObject;
 import java.io.InputStream;
+import java.net.URL;
+import java.text.SimpleDateFormat;
+import java.util.TimeZone;
 import org.everit.json.schema.Schema;
 import org.everit.json.schema.loader.SchemaLoader;
 import org.json.JSONObject;
@@ -59,18 +62,18 @@ public class Validator {
 
     }
 
-    public static void validateTxId(String txid) throws Exception {
-        if (txid == null || txid.length() == 0) {
+    public static void validateTxid(String txid) throws Exception {
+        if (StringUtil.isNullOrEmpty(txid)) {
             throw new Exception("txid length should NOT be shorter than 1");
         }
     }
 
     public static void validatePrivateInfo(String privateInfo) throws Exception {
-        if (privateInfo == null || privateInfo.length() == 0) {
+        if (StringUtil.isNullOrEmpty(privateInfo)) {
             throw new Exception("privateInfo length should NOT be shorter than 1");
         }
     }
-    
+
     public static void validateTransactionSchema(JsonObject transaction) throws Exception {
         JSONObject jsonObject = new JSONObject(transaction.toString());
         validateTransactionSchema(jsonObject);
@@ -83,4 +86,26 @@ public class Validator {
         schema.validate(transaction);
     }
 
+    public static void validateDataDate(String dataDate) throws Exception {
+        if (StringUtil.isNullOrEmpty(dataDate)) {
+            throw new Exception("dataDate length should NOT be shorter than 1");
+        }
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
+        sdf.setTimeZone(TimeZone.getTimeZone("GMT"));
+        sdf.parse(dataDate);
+    }
+
+    public static void validateUrl(String url) throws Exception {
+        if (StringUtil.isNullOrEmpty(url)) {
+            throw new Exception("url length should NOT be shorter than 1");
+        }
+        URL instance = new URL(url);
+        System.out.print(String.format("validateUrl url = ", instance.toString()));
+    }
+    
+    public static void validatePrivateKey(String privateKey) throws Exception {
+        if (StringUtil.isNullOrEmpty(privateKey)) {
+            throw new Exception("privateKey length should NOT be shorter than 1");
+        }
+    }
 }

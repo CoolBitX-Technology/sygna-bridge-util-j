@@ -1,15 +1,22 @@
 package com.coolbitx.sygna.bridge;
 
-import com.coolbitx.sygna.bridge.enums.PermissionStatus;
 import com.coolbitx.sygna.bridge.enums.RejectCode;
+import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Field;
+import com.coolbitx.sygna.bridge.model.Permission;
+import com.coolbitx.sygna.bridge.model.PermissionRequest;
+import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.CallbackSerializer;
+import com.coolbitx.sygna.json.PermissionRequestSerializer;
+import com.coolbitx.sygna.json.PermissionSerializer;
+import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.util.ECDSA;
 import com.coolbitx.sygna.util.ECIES;
-import com.coolbitx.sygna.util.StringUtil;
 import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import java.util.Calendar;
 
@@ -71,19 +78,23 @@ public class Crypto {
      */
     public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
             String privateKey, long expireDate) throws Exception {
-        Validator.validatePrivateInfo(privateInfo);
-        Validator.validateTransactionSchema(transaction);
-        Validator.validateExpireDate(Calendar.getInstance(), expireDate);
+        PermissionRequest permissionRequest = new PermissionRequest(null,privateInfo,transaction,dataDt,expireDate);
+        return signPermissionRequest(permissionRequest,privateKey);
+    }
 
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.PRIVATE_INFO, privateInfo);
-        obj.add(Field.TRANSACTION, transaction);
-        obj.addProperty(Field.DATA_DT, dataDt);
-
-        if (expireDate != 0l) {
-            obj.addProperty(Field.EXPIRE_DATE, expireDate);
-        }
-
+    /**
+     * @param permissionRequest
+     * @param privateKey
+     * @return { {@link Field#PRIVATE_INFO}: {@link String},
+     *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
+     *         {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermissionRequest(PermissionRequest permissionRequest,
+            String privateKey) throws Exception {
+        permissionRequest.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(PermissionRequest.class, new PermissionRequestSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(permissionRequest, PermissionRequest.class);
         return signObject(obj, privateKey);
     }
 
@@ -94,8 +105,20 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception {
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.CALL_BACK_URL, callbackUrl);
+        Callback callback = new Callback(null, callbackUrl);;
+        return signCallBack(callback, privateKey);
+    }
+
+    /**
+     * @param callback
+     * @param privateKey
+     * @return { {@link Field#CALL_BACK_URL}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signCallBack(Callback callback, String privateKey) throws Exception {
+        callback.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Callback.class, new CallbackSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(callback, Callback.class);
         return signObject(obj, privateKey);
     }
 
@@ -134,6 +157,40 @@ public class Crypto {
      * @param permissionStatus
      * @param privateKey
      * @param rejectCode
+     * @return { {@link Field#TRANSFER_ID}: {@link String},
+     *         {@link Field#PERMISSION_STATUS}: {@link String},
+     *         {@link Field#REJECT_CODE}: {@link String},
+     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, RejectCode rejectCode)
+            throws Exception {
+        return signPermission(transferId, permissionStatus, privateKey, 0l, rejectCode, null);
+    }
+
+    /**
+     * @param transferId
+     * @param permissionStatus
+     * @param privateKey
+     * @param expireDate epoch timestamp in milliseconds
+     * @param rejectCode
+     * @return { {@link Field#TRANSFER_ID}: {@link String},
+     *         {@link Field#PERMISSION_STATUS}: {@link String},
+     *         {@link Field#EXPIRE_DATE}: {@link long},
+     *         {@link Field#REJECT_CODE}: {@link String},
+     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode)
+            throws Exception {
+        return signPermission(transferId, permissionStatus, privateKey, expireDate, rejectCode, null);
+    }
+
+    /**
+     * @param transferId
+     * @param permissionStatus
+     * @param privateKey
+     * @param rejectCode
      * @param rejectMessage
      * @return { {@link Field#TRANSFER_ID}: {@link String},
      *         {@link Field#PERMISSION_STATUS}: {@link String},
@@ -164,22 +221,26 @@ public class Crypto {
      */
     public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode, String rejectMessage)
             throws Exception {
-        Validator.validatePermissionStatus(permissionStatus);
-        Validator.validateExpireDate(Calendar.getInstance(), expireDate);
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.TRANSFER_ID, transferId);
-        obj.addProperty(Field.PERMISSION_STATUS, permissionStatus);
+        Permission permission = new Permission(null, transferId, permissionStatus, expireDate, rejectCode, rejectMessage);
+        return signPermission(permission, privateKey);
+    }
 
-        if (expireDate != 0l) {
-            obj.addProperty(Field.EXPIRE_DATE, expireDate);
-        }
-        Validator.validateRejectData(permissionStatus, rejectCode, rejectMessage);
-        if (permissionStatus.equals(PermissionStatus.REJECTED.getStatus())) {
-            obj.addProperty(Field.REJECT_CODE, rejectCode.getRejectCode());
-            if (!StringUtil.isNullOrEmpty(rejectMessage)) {
-                obj.addProperty(Field.REJECT_MESSAGE, rejectMessage);
-            }
-        }
+    /**
+     * @param permission
+     * @param privateKey
+     * @return { {@link Field#TRANSFER_ID}: {@link String},
+     *         {@link Field#PERMISSION_STATUS}: {@link String},
+     *         {@link Field#EXPIRE_DATE}: {@link long},
+     *         {@link Field#REJECT_CODE}: {@link String},
+     *         {@link Field#REJECT_MESSAGE}: {@link String},
+     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signPermission(Permission permission, String privateKey)
+            throws Exception {
+        permission.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PermissionSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(permission, Permission.class);
         return signObject(obj, privateKey);
     }
 
@@ -192,11 +253,21 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signTxId(String transferId, String txId, String privateKey) throws Exception {
-        Validator.validateTransferId(transferId);
-        Validator.validateTxId(txId);
-        JsonObject obj = new JsonObject();
-        obj.addProperty(Field.TRANSFER_ID, transferId);
-        obj.addProperty(Field.TX_ID, txId);
+        Transaction transaction = new Transaction(transferId, txId, null);
+        return signTxId(transaction, privateKey);
+    }
+
+    /**
+     * @param transaction
+     * @param privateKey
+     * @return { {@link Field#TRANSFER_ID}: {@link String}, {@link Field#TX_ID}:
+     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signTxId(Transaction transaction, String privateKey) throws Exception {
+        transaction.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(Transaction.class, new TransactionSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(transaction, Transaction.class);
         return signObject(obj, privateKey);
     }
 
@@ -209,6 +280,7 @@ public class Crypto {
      * @throws Exception
      */
     public static JsonObject signObject(JsonObject obj, String privateKey) throws Exception {
+        Validator.validatePrivateKey(privateKey);
         obj.addProperty(Field.SIGNATURE, "");
         Gson gson = new Gson();
         final String signature = ECDSA.sign(gson.toJson(obj), privateKey);
@@ -217,7 +289,8 @@ public class Crypto {
     }
 
     /**
-     * {@code publicKey} defaults to null null null null null null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
+     * {@code publicKey} defaults to null null null null null null null null
+     * null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
 	 *
      * {@link Crypto#verifyObject(JsonObject, String)}
      *
@@ -247,5 +320,4 @@ public class Crypto {
         System.out.printf("Message:\n%s\n", msg);
         return ECDSA.verify(msg, signature, publicKey);
     }
-
 }

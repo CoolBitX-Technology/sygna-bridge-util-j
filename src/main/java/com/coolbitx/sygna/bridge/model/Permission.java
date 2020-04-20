@@ -20,6 +20,21 @@ public class Permission extends Packet {
         this.expire_date = expire_date;
     }
 
+    public Permission(String signature, String transfer_id, String permission_status, RejectCode rejectCode) {
+        super(signature);
+        this.transfer_id = transfer_id;
+        this.permission_status = permission_status;
+        this.rejectCode = rejectCode;
+    }
+
+    public Permission(String signature, String transfer_id, String permission_status, long expire_date, RejectCode rejectCode) {
+        super(signature);
+        this.transfer_id = transfer_id;
+        this.permission_status = permission_status;
+        this.expire_date = expire_date;
+        this.rejectCode = rejectCode;
+    }
+
     public Permission(String signature, String transfer_id, String permission_status, RejectCode rejectCode,
             String rejectMessage) {
         super(signature);
@@ -73,10 +88,13 @@ public class Permission extends Packet {
     @Override
     public void check() throws Exception {
         super.check();
+        checkSignData();
+    }
+
+    public void checkSignData() throws Exception {
         Validator.validateTransferId(transfer_id);
         Validator.validatePermissionStatus(permission_status);
         Validator.validateExpireDate(Calendar.getInstance(), expire_date);
 //        Validator.validateRejectData(permission_status, rejectCode, rejectMessage);
     }
-
 }
