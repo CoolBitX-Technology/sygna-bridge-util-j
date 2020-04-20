@@ -95,6 +95,6 @@ public class Permission extends Packet {
         Validator.validateTransferId(transfer_id);
         Validator.validatePermissionStatus(permission_status);
         Validator.validateExpireDate(Calendar.getInstance(), expire_date);
-        Validator.validateRejectData(permission_status, rejectCode, rejectMessage);
+//        Validator.validateRejectData(permission_status, rejectCode, rejectMessage);
     }
 }
