@@ -9,7 +9,9 @@ import com.coolbitx.sygna.bridge.model.PermissionRequest;
 import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.bridge.model.VaspDetail;
+import com.coolbitx.sygna.bridge.model.BeneficiaryEndpointUrl;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.BeneficiaryEndpointUrlSerializer;
 import com.coolbitx.sygna.json.CallbackSerializer;
 import com.coolbitx.sygna.json.PermissionRequestSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
@@ -58,8 +60,8 @@ public class API {
     public String getVASPPublicKey(String vaspCode, boolean validate) throws Exception {
         return getVASPPublicKey(vaspCode, validate, false);
     }
-    
-        /**
+
+    /**
      * A Wrapper function of getVASPList to return specific VASP's Public Key.
      *
      * @param vaspCode
@@ -68,8 +70,8 @@ public class API {
      * @return uncompressed Public Key
      * @throws Exception
      */
-    public String getVASPPublicKey(String vaspCode, boolean validate,boolean isProd) throws Exception {
-        final ArrayList<VaspDetail> vasps = getVASPList(validate);
+    public String getVASPPublicKey(String vaspCode, boolean validate, boolean isProd) throws Exception {
+        final ArrayList<VaspDetail> vasps = getVASPList(validate, isProd);
         for (VaspDetail item : vasps) {
             if (vaspCode.equals(item.getVasp_code())) {
                 return item.getVasp_pubkey();
@@ -88,24 +90,24 @@ public class API {
      * @throws Exception
      */
     public ArrayList<VaspDetail> getVASPList() throws Exception {
-        return getVASPList(true,false);
+        return getVASPList(true, false);
     }
 
     /**
      * {@code isProd} defaults to {@link Boolean#FALSE}
      *
      * @see API#getVASPList(boolean, boolean)
-     * 
+     *
      * @param validate whether to validate returned vasp list data.
      *
      * @return
      * @throws Exception
      */
     public ArrayList<VaspDetail> getVASPList(boolean validate) throws Exception {
-        return getVASPList(validate,false);
+        return getVASPList(validate, false);
     }
-    
-        /**
+
+    /**
      * Get list of registered VASP associated with publicKey.
      *
      * @param validate whether to validate returned vasp list data.
@@ -114,7 +116,7 @@ public class API {
      * @throws Exception
      */
     public ArrayList<VaspDetail> getVASPList(boolean validate, boolean isProd) throws Exception {
-        final String url = this.domain + "api/v1/bridge/vasp";
+        final String url = this.domain + "api/v1.1.0/bridge/vasp";
         Gson gson = new Gson();
         JsonObject obj = getSB(url);
 
@@ -142,7 +144,7 @@ public class API {
      */
     public JsonObject postPermission(Permission perm) throws Exception {
         perm.check();
-        final String url = this.domain + "api/v1/bridge/transaction/permission";
+        final String url = this.domain + "api/v1.1.0/bridge/transaction/permission";
         Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PermissionSerializer()).create();
         return postSB(url, (JsonObject) gson.toJsonTree(perm, Permission.class));
     }
@@ -155,7 +157,7 @@ public class API {
      * @throws Exception
      */
     public JsonObject getStatus(String transferId) throws Exception {
-        final String url = this.domain + "api/v1/bridge/transaction/status?transfer_id=" + transferId;
+        final String url = this.domain + "api/v1.1.0/bridge/transaction/status?transfer_id=" + transferId;
         return getSB(url);
     }
 
@@ -171,7 +173,7 @@ public class API {
     public JsonObject postPermissionRequest(PermissionRequest permReq, Callback callback) throws Exception {
         permReq.check();
         callback.check();
-        final String url = this.domain + "api/v1/bridge/transaction/permission-request";
+        final String url = this.domain + "api/v1.1.0/bridge/transaction/permission-request";
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(PermissionRequest.class, new PermissionRequestSerializer())
                 .registerTypeAdapter(Callback.class, new CallbackSerializer())
@@ -192,7 +194,7 @@ public class API {
     public JsonObject postTransactionId(Transaction tx) throws Exception {
         tx.check();
         Gson gson = new GsonBuilder().registerTypeAdapter(Transaction.class, new TransactionSerializer()).create();
-        final String url = this.domain + "api/v1/bridge/transaction/txid";
+        final String url = this.domain + "api/v1.1.0/bridge/transaction/txid";
         return postSB(url, (JsonObject) gson.toJsonTree(tx, Transaction.class));
     }
 
@@ -224,6 +226,20 @@ public class API {
         headers.addProperty("api_key", this.apiKey);
         final JsonObject response = HttpClient.get(url, headers, BridgeConfig.HTTP_TIMEOUT);
         return response;
+    }
+
+    /**
+     * revise beneficiary endpoint url
+     *
+     * @param beneficiaryEndpointUrl
+     * @return
+     * @throws Exception
+     */
+    public JsonObject postBeneficiaryEndpointUrl(BeneficiaryEndpointUrl beneficiaryEndpointUrl) throws Exception {
+        beneficiaryEndpointUrl.check();
+        Gson gson = new GsonBuilder().registerTypeAdapter(BeneficiaryEndpointUrl.class, new BeneficiaryEndpointUrlSerializer()).create();
+        final String url = this.domain + "api/v1.1.0/bridge/vasp/beneficiary-endpoint-url";
+        return postSB(url, (JsonObject) gson.toJsonTree(beneficiaryEndpointUrl, BeneficiaryEndpointUrl.class));
     }
 
 }
