@@ -102,10 +102,16 @@ public class Validator {
         URL instance = new URL(url);
         System.out.print(String.format("validateUrl url = ", instance.toString()));
     }
-    
+
     public static void validatePrivateKey(String privateKey) throws Exception {
         if (StringUtil.isNullOrEmpty(privateKey)) {
             throw new Exception("privateKey length should NOT be shorter than 1");
+        }
+    }
+
+    public static void validateVaspCode(String vaspCode) throws Exception {
+        if (StringUtil.isNullOrEmpty(vaspCode)) {
+            throw new Exception("vaspCode length should NOT be shorter than 1");
         }
     }
 }
