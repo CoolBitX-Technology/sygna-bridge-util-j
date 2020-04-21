@@ -17,6 +17,7 @@ import org.junit.runners.Suite.SuiteClasses;
     PermissionSerializerTest.class,
     TransactionSerializerTest.class,
     CallbackSerializerTest.class,
+    BeneficiaryEndpointUrlSerializerTest.class,
     ValidateTransactionSchemaTest.class, 
     ValidatorTest.class })
 public class AllTests {
