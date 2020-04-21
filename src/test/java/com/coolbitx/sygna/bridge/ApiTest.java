@@ -22,7 +22,7 @@ import static org.junit.Assert.fail;
 
 public class ApiTest {
 
-    private final static String DOMAIN = "https://dev-api.sygna.io/sb/";
+    private final static String DOMAIN = "https://test-api.sygna.io/sb/";
     private final static String ORIGINATOR_API_KEY = "a973dc6b71115c6126370191e70fe84d87150067da0ab37616eecd3ae16e288d";
     private final static String BENEFICIARY_API_KEY = "b94c6668bbdf654c805374c13bc7b675f00abc50ec994dbce322d7fb0138c875";
     private final static String CALLBACK_URL = "https://api.sygna.io/api/v1.1.0/bridge/";
