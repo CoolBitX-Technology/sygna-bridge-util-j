@@ -42,9 +42,9 @@
       "minLength": 1
     },
     "amount": {
-      "type": "number",
-      "minimum": 0,
-      "exclusiveMinimum": true
+      "type": "string",
+      "minLength": 1,
+      "pattern": "^\\d*\\.?\\d*$"
     }
   },
   "required": [
