@@ -2,6 +2,7 @@ package com.coolbitx.sygna.bridge;
 
 import com.coolbitx.sygna.bridge.enums.PermissionStatus;
 import com.coolbitx.sygna.bridge.enums.RejectCode;
+import com.coolbitx.sygna.bridge.model.BeneficiaryEndpointUrl;
 
 import org.junit.Test;
 
@@ -21,11 +22,10 @@ import static org.junit.Assert.fail;
 
 public class ApiTest {
 
-
     private final static String DOMAIN = "https://test-api.sygna.io/sb/";
     private final static String ORIGINATOR_API_KEY = "a973dc6b71115c6126370191e70fe84d87150067da0ab37616eecd3ae16e288d";
     private final static String BENEFICIARY_API_KEY = "b94c6668bbdf654c805374c13bc7b675f00abc50ec994dbce322d7fb0138c875";
-    private final static String CALLBACK_URL = "https://google.com";
+    private final static String CALLBACK_URL = "https://api.sygna.io/api/v1.1.0/bridge/";
 
     @Test
     public void testGetVaspList() throws Exception {
@@ -59,7 +59,7 @@ public class ApiTest {
         Gson gson = new Gson();
         gson.fromJson(obj, Vasp.class);
     }
-    
+
     @Test
     public void testPostTransactionIdFailed() throws Exception {
         String txId = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
@@ -88,7 +88,7 @@ public class ApiTest {
             assertEquals(e.getMessage(), "txid length should NOT be shorter than 1");
         }
     }
-    
+
     @Test
     public void testPostTransactionId() throws Exception {
         String txId = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
@@ -185,6 +185,7 @@ public class ApiTest {
         String errorCode = obj.get("err_code").getAsString();
         assertEquals(errorCode, "010215"); // "The transfer already has permission status"
     }
+
     @Test
     public void testpostPermissionRequestFailed() throws Exception {
         String permReqSig = "48f5220f45d65c7f586e5b147f3ebd7e1803c1a86183498b62d74151517311465a80a3d1b742df191ffaee6329192b6d63e49ea1598467c001cc732e8df6e566";
@@ -205,7 +206,7 @@ public class ApiTest {
         transaction.addProperty("transaction_currency", "0x80000000");
         transaction.addProperty("amount", 0.973);
 
-        String callbackSig = "1882c95212b5eeef27538558bbf53b84cb6518ee5a4b5b4230871cdf2290282963157bb846885564f4543ed85c6daab10f22010ca211ee63e8b1d00b7e942a85";
+        String callbackSig = "a32fd8dc7e0eb143d3b4e9d590170962c59b9b4b2d927342182339bb375ce08d6b84fca5dd7a5d952332c78c45a2377d026dae0279871fb1847ad68acc61c155";
 
         API api = new API(ORIGINATOR_API_KEY, DOMAIN);
         try {
@@ -304,7 +305,7 @@ public class ApiTest {
         transaction.addProperty("transaction_currency", "0x80000000");
         transaction.addProperty("amount", 0.973);
 
-        String callbackSig = "1882c95212b5eeef27538558bbf53b84cb6518ee5a4b5b4230871cdf2290282963157bb846885564f4543ed85c6daab10f22010ca211ee63e8b1d00b7e942a85";
+        String callbackSig = "a32fd8dc7e0eb143d3b4e9d590170962c59b9b4b2d927342182339bb375ce08d6b84fca5dd7a5d952332c78c45a2377d026dae0279871fb1847ad68acc61c155";
         Callback callback = new Callback(callbackSig, CALLBACK_URL);
         API api = new API(ORIGINATOR_API_KEY, DOMAIN);
         PermissionRequest permReq = new PermissionRequest(permReqSig, privateInfo, transaction, dataDate);
@@ -312,5 +313,48 @@ public class ApiTest {
         System.out.println("return:" + obj.toString());
         String errorCode = obj.get("err_code").getAsString();
         assertEquals(errorCode, "010211"); // No permission
+    }
+
+    @Test
+    public void testPostBeneficiaryEndpointUrlFailed() throws Exception {
+        String vaspCode = "VASPUSNY1";
+        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
+        String signature = "4b97136c369d40d05af5c381c6cfa2a5118c56c375caff6dc5cdca0bba2c0be7391b398d94473e4b11aec50860b10f593202d1dc3af279fa1814e7174184c476";
+
+        API api = new API(BENEFICIARY_API_KEY, DOMAIN);
+        try {
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl("123", vaspCode, beneficiaryEndpointUrl));
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "signature length should be 128");
+        }
+
+        try {
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, null, beneficiaryEndpointUrl));
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "vaspCode length should NOT be shorter than 1");
+        }
+
+        try {
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, "123"));
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isMalformedURLException = (e instanceof MalformedURLException);
+            assertEquals(isMalformedURLException, true);
+        }
+    }
+
+    @Test
+    public void testPostBeneficiaryEndpointUrl() throws Exception {
+        String vaspCode = "VASPUSNY1";
+        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
+        String signature = "4b97136c369d40d05af5c381c6cfa2a5118c56c375caff6dc5cdca0bba2c0be7391b398d94473e4b11aec50860b10f593202d1dc3af279fa1814e7174184c476";
+
+        API api = new API(BENEFICIARY_API_KEY, DOMAIN);
+        JsonObject obj = api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, beneficiaryEndpointUrl));
+        System.out.println("return:" + obj.toString());
+        String status = obj.get("status").getAsString();
+        assertEquals(status, "OK");
     }
 }

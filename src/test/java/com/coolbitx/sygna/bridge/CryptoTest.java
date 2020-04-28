@@ -13,7 +13,7 @@ public class CryptoTest {
 
     private final static String PUBLIC_KEY = "045b409c8c15fd82744ce4f7f86d65f27d605d945d4c4eee0e4e2515a3894b9d157483cc5e49c62c07b46cd59bc980445d9cf987622d66df20c6c3634f6eb05085";
     private final static String PRIVATE_KEY = "bf76d2680f23f6fc28111afe0179b8704c8e203a5faa5112f8aa52721f78fe6a";
-    private final static String CALLBACK_URL = "https://google.com";
+    private final static String CALLBACK_URL = "https://api.sygna.io/api/v1.1.0/bridge/";
 
     @Test
     public void testEncodeAndDecode() throws Exception {
@@ -106,7 +106,7 @@ public class CryptoTest {
         boolean isVerified = Crypto.verifyObject(cloneSignedObj, PUBLIC_KEY);
         assertEquals(isVerified, true);
 
-        String expectedSignature = "db6bef6b2201f3b7d42783ba6579758ad8d0e1bad8b2b732d499758e73c185e34e009f84ca68f1927c9c2ffee53bb730871a40faf555d82e28b8a211f25b213b";
+        String expectedSignature = "2cf2aaf91bf0056078542204a97d3462c17586f46b1e4fb63fc418a6c7f8e27f37f61a85a8425774b77466c2f5042352b295aa7d584fcf70bbadaf3ebbaef2bd";
         String signature = signedObj.get("signature").getAsString();
         assertEquals(signature, expectedSignature);
     }
@@ -186,6 +186,21 @@ public class CryptoTest {
         assertEquals(isVerified, true);
 
         String expectedSignature = "9c9def21dd6860dbeae18362115d2adb6c98fe1e655965d503af0f3d7ad893b03adebcedc8d5a6a0e71e9c5d32d00e518c6dd056cf095af976c66aaef490712b";
+        String signature = signedObj.get("signature").getAsString();
+        assertEquals(signature, expectedSignature);
+    }
+
+    @Test
+    public void testSignBeneficiaryEndpointUrl() throws Exception {
+        String vaspCode = "VASPUSNY1";
+        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
+        
+        JsonObject signedObj = Crypto.signBeneficiaryEndpointUrl(vaspCode,beneficiaryEndpointUrl, PRIVATE_KEY);
+        JsonObject cloneSignedObj = signedObj.deepCopy();
+        boolean isVerified = Crypto.verifyObject(cloneSignedObj, PUBLIC_KEY);
+        assertEquals(isVerified, true);
+
+        String expectedSignature = "72283fb8ba3ceba13bcb29e263fb283eabe4b76c9db114dfad5f9da4ef1d664077e74b1f27133efb7450ef5bd4b72b35f59ee609703a74f6692e9b5ca9c4f8f5";
         String signature = signedObj.get("signature").getAsString();
         assertEquals(signature, expectedSignature);
     }

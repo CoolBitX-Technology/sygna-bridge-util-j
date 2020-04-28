@@ -26,7 +26,7 @@ public class CallbackSerializerTest {
     @Test
     public void testCallbackSerializer() {
         String signature = null;
-        String callbackUrl = "https://google.com";
+        String callbackUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
 
         //should ignore signature if signature is empty
         Callback callback = new Callback(signature, callbackUrl);

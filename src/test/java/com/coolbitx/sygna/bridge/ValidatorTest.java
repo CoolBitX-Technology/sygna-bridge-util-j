@@ -394,7 +394,7 @@ public class ValidatorTest {
         }
 
         try {
-            String url = "https://google.com";
+            String url = "https://api.sygna.io/api/v1.1.0/bridge/";
             Validator.validateUrl(url);
         } catch (Exception e) {
             fail("unexpected exception was occured.");
@@ -425,6 +425,33 @@ public class ValidatorTest {
             Validator.validatePrivateKey(privateKey);
         } catch (Exception e) {
             fail("unexpected exception was occured.");
+        }
+    }
+
+    @Test
+    public void testValidateVaspCode() {
+        String expectedErrorMessage = "vaspCode length should NOT be shorter than 1";
+        try {
+            String vaspCode = null;
+            Validator.validateVaspCode(vaspCode);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            String vaspCode = "";
+            Validator.validateVaspCode(vaspCode);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            String vaspCode = "1234";
+            Validator.validateVaspCode(vaspCode);
+        } catch (Exception e) {
+            fail("Should not have thrown any exception");
         }
     }
 

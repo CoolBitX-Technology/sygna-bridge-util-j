@@ -35,7 +35,7 @@ public class ValidateTransactionSchemaTest {
         expectedJSONObject.put("beneficiary_vasp_code", "VASPTWTP2");
         expectedJSONObject.put("beneficiary_addrs", beneficiaryAddrs);
         expectedJSONObject.put("transaction_currency", "0x80000000");
-        expectedJSONObject.put("amount", 1);
+        expectedJSONObject.put("amount", "1");
     }
 
 //    public 
@@ -193,19 +193,19 @@ public class ValidateTransactionSchemaTest {
         cloneJSONObject1.remove("amount");
         validateSchema(cloneJSONObject1);
 
-        //should throw ValidationException if amount is not number
+        //should throw ValidationException if amount is not string
         JSONObject cloneJSONObject2 = new JSONObject(expectedJSONObject, JSONObject.getNames(expectedJSONObject));
-        cloneJSONObject2.put("amount", "1");
+        cloneJSONObject2.put("amount", 1);
         validateSchema(cloneJSONObject2);
 
-        //should throw ValidationException if amount = 0
+        //should throw ValidationException if amount is empty
         JSONObject cloneJSONObject3 = new JSONObject(expectedJSONObject, JSONObject.getNames(expectedJSONObject));
-        cloneJSONObject3.put("amount", 0);
+        cloneJSONObject3.put("amount", "");
         validateSchema(cloneJSONObject3);
 
-        //should throw ValidationException if amount < 0
+        //should throw ValidationException if amount is not valid number
         JSONObject cloneJSONObject4 = new JSONObject(expectedJSONObject, JSONObject.getNames(expectedJSONObject));
-        cloneJSONObject4.put("amount", -1);
+        cloneJSONObject4.put("amount", "abc");
         validateSchema(cloneJSONObject4);
     }
 

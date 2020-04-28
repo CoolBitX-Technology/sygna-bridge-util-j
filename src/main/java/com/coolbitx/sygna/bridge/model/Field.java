@@ -21,4 +21,6 @@ public abstract class Field {
     public final static String BENEFICIARY_ADDRS_EXTRA = "beneficiary_addrs_extra";
     public final static String TRANSACTION_CURRENCY = "transaction_currency";
     public final static String AMOUNT = "amount";
+    public final static String VASP_CODE = "vasp_code";
+    public final static String BENEFICIARY_ENDPOINT_URL = "beneficiary_endpoint_url";
 }

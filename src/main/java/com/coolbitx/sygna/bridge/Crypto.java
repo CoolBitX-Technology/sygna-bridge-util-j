@@ -1,6 +1,7 @@
 package com.coolbitx.sygna.bridge;
 
 import com.coolbitx.sygna.bridge.enums.RejectCode;
+import com.coolbitx.sygna.bridge.model.BeneficiaryEndpointUrl;
 import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.bridge.model.Permission;
@@ -8,6 +9,7 @@ import com.coolbitx.sygna.bridge.model.PermissionRequest;
 import com.coolbitx.sygna.bridge.model.Transaction;
 import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.json.BeneficiaryEndpointUrlSerializer;
 import com.coolbitx.sygna.json.CallbackSerializer;
 import com.coolbitx.sygna.json.PermissionRequestSerializer;
 import com.coolbitx.sygna.json.PermissionSerializer;
@@ -18,7 +20,6 @@ import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
-import java.util.Calendar;
 
 public class Crypto {
 
@@ -78,8 +79,8 @@ public class Crypto {
      */
     public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
             String privateKey, long expireDate) throws Exception {
-        PermissionRequest permissionRequest = new PermissionRequest(null,privateInfo,transaction,dataDt,expireDate);
-        return signPermissionRequest(permissionRequest,privateKey);
+        PermissionRequest permissionRequest = new PermissionRequest(null, privateInfo, transaction, dataDt, expireDate);
+        return signPermissionRequest(permissionRequest, privateKey);
     }
 
     /**
@@ -289,9 +290,7 @@ public class Crypto {
     }
 
     /**
-     * {@code publicKey} defaults to null null null null null null null null
-     * null null     {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
-	 *
+     * {@code publicKey} defaults to {@link BridgeConfig#SYGNA_BRIDGE_CENTRAL_PUBKEY}
      * {@link Crypto#verifyObject(JsonObject, String)}
      *
      * @param obj
@@ -319,5 +318,32 @@ public class Crypto {
         final String msg = gson.toJson(obj);
         System.out.printf("Message:\n%s\n", msg);
         return ECDSA.verify(msg, signature, publicKey);
+    }
+
+    /**
+     * @param vaspCode
+     * @param beneficiaryEndpointUrl
+     * @param privateKey
+     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#BENEFICIARY_ENDPOINT_URL}:
+     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signBeneficiaryEndpointUrl(String vaspCode, String beneficiaryEndpointUrl, String privateKey) throws Exception {
+        BeneficiaryEndpointUrl instance = new BeneficiaryEndpointUrl(null, vaspCode, beneficiaryEndpointUrl);
+        return signBeneficiaryEndpointUrl(instance, privateKey);
+    }
+
+    /**
+     * @param beneficiaryEndpointUrl
+     * @param privateKey
+     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#BENEFICIARY_ENDPOINT_URL}:
+     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @throws Exception
+     */
+    public static JsonObject signBeneficiaryEndpointUrl(BeneficiaryEndpointUrl beneficiaryEndpointUrl, String privateKey) throws Exception {
+        beneficiaryEndpointUrl.checkSignData();
+        Gson gson = new GsonBuilder().registerTypeAdapter(BeneficiaryEndpointUrl.class, new BeneficiaryEndpointUrlSerializer()).create();
+        JsonObject obj = (JsonObject) gson.toJsonTree(beneficiaryEndpointUrl, BeneficiaryEndpointUrl.class);
+        return signObject(obj, privateKey);
     }
 }
