@@ -193,14 +193,15 @@ public class CryptoTest {
     @Test
     public void testSignBeneficiaryEndpointUrl() throws Exception {
         String vaspCode = "VASPUSNY1";
-        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
-        
-        JsonObject signedObj = Crypto.signBeneficiaryEndpointUrl(vaspCode,beneficiaryEndpointUrl, PRIVATE_KEY);
+        String callbackPermissionRequestUrl = "https://api.sygna.io/api/v1.1.0/bridge/permission-request";
+        String callbackTxIdUrl = "https://api.sygna.io/api/v1.1.0/bridge/txid";
+
+        JsonObject signedObj = Crypto.signBeneficiaryEndpointUrl(vaspCode, callbackPermissionRequestUrl, callbackTxIdUrl, PRIVATE_KEY);
         JsonObject cloneSignedObj = signedObj.deepCopy();
         boolean isVerified = Crypto.verifyObject(cloneSignedObj, PUBLIC_KEY);
         assertEquals(isVerified, true);
 
-        String expectedSignature = "72283fb8ba3ceba13bcb29e263fb283eabe4b76c9db114dfad5f9da4ef1d664077e74b1f27133efb7450ef5bd4b72b35f59ee609703a74f6692e9b5ca9c4f8f5";
+        String expectedSignature = "9bae1abb5864a5af4dbf3b5ca524fdc067b93247c7f120fd9056394290feb1d7016132a96a165992ad170346749b716a43efef01a6160bfebf26e1c2164ff02a";
         String signature = signedObj.get("signature").getAsString();
         assertEquals(signature, expectedSignature);
     }

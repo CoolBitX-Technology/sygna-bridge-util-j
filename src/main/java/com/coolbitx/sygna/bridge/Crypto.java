@@ -322,22 +322,25 @@ public class Crypto {
 
     /**
      * @param vaspCode
-     * @param beneficiaryEndpointUrl
+     * @param callbackPermissionRequestUrl
+     * @param callbackTxIdUrl
      * @param privateKey
-     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#BENEFICIARY_ENDPOINT_URL}:
-     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#CALLBACK_PERMISION_REQUEST_URL}:
+     *         {@link String}, {@link Field#CALLBACK_TXID_URL}: {@link String} }
+     *         {@link Field#FIELD_SIGNATURE}: {@link String} }
      * @throws Exception
      */
-    public static JsonObject signBeneficiaryEndpointUrl(String vaspCode, String beneficiaryEndpointUrl, String privateKey) throws Exception {
-        BeneficiaryEndpointUrl instance = new BeneficiaryEndpointUrl(null, vaspCode, beneficiaryEndpointUrl);
+    public static JsonObject signBeneficiaryEndpointUrl(String vaspCode, String callbackPermissionRequestUrl, String callbackTxIdUrl, String privateKey) throws Exception {
+        BeneficiaryEndpointUrl instance = new BeneficiaryEndpointUrl(null, vaspCode, callbackPermissionRequestUrl, callbackTxIdUrl);
         return signBeneficiaryEndpointUrl(instance, privateKey);
     }
 
     /**
      * @param beneficiaryEndpointUrl
      * @param privateKey
-     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#BENEFICIARY_ENDPOINT_URL}:
-     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#CALLBACK_PERMISION_REQUEST_URL}:
+     *         {@link String}, {@link Field#CALLBACK_TXID_URL}: {@link String} }
+     *         {@link Field#FIELD_SIGNATURE}: {@link String} }
      * @throws Exception
      */
     public static JsonObject signBeneficiaryEndpointUrl(BeneficiaryEndpointUrl beneficiaryEndpointUrl, String privateKey) throws Exception {
