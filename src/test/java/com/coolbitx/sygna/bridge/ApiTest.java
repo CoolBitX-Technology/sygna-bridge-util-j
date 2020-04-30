@@ -318,41 +318,60 @@ public class ApiTest {
     @Test
     public void testPostBeneficiaryEndpointUrlFailed() throws Exception {
         String vaspCode = "VASPUSNY1";
-        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
-        String signature = "4b97136c369d40d05af5c381c6cfa2a5118c56c375caff6dc5cdca0bba2c0be7391b398d94473e4b11aec50860b10f593202d1dc3af279fa1814e7174184c476";
+        String callbackPermissionRequest_url
+                = "https://api.sygna.io/api/v1.1.0/bridge/permission-request";
+        String callbackTxidUrl = "https://api.sygna.io/api/v1.1.0/bridge/txid";
+        String signature = "9bae1abb5864a5af4dbf3b5ca524fdc067b93247c7f120fd9056394290feb1d7016132a96a165992ad170346749b716a43efef01a6160bfebf26e1c2164ff02a";
 
         API api = new API(BENEFICIARY_API_KEY, DOMAIN);
         try {
-            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl("123", vaspCode, beneficiaryEndpointUrl));
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl("123", vaspCode, callbackPermissionRequest_url, callbackTxidUrl));
             fail("expected exception was not occured.");
         } catch (Exception e) {
             assertEquals(e.getMessage(), "signature length should be 128");
         }
 
         try {
-            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, null, beneficiaryEndpointUrl));
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, null, callbackPermissionRequest_url, callbackTxidUrl));
             fail("expected exception was not occured.");
         } catch (Exception e) {
             assertEquals(e.getMessage(), "vaspCode length should NOT be shorter than 1");
         }
 
         try {
-            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, "123"));
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, "123", callbackTxidUrl));
             fail("expected exception was not occured.");
         } catch (Exception e) {
             boolean isMalformedURLException = (e instanceof MalformedURLException);
             assertEquals(isMalformedURLException, true);
+        }
+
+        try {
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, callbackPermissionRequest_url, "123"));
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isMalformedURLException = (e instanceof MalformedURLException);
+            assertEquals(isMalformedURLException, true);
+        }
+
+        try {
+            api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, null, null));
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), "Selecting one or more of the following property is mandatory: 'callbackPermissionRequestUrl', 'callbackTxIdUrl'");
         }
     }
 
     @Test
     public void testPostBeneficiaryEndpointUrl() throws Exception {
         String vaspCode = "VASPUSNY1";
-        String beneficiaryEndpointUrl = "https://api.sygna.io/api/v1.1.0/bridge/";
-        String signature = "4b97136c369d40d05af5c381c6cfa2a5118c56c375caff6dc5cdca0bba2c0be7391b398d94473e4b11aec50860b10f593202d1dc3af279fa1814e7174184c476";
+        String callbackPermissionRequest_url
+                = "https://api.sygna.io/api/v1.1.0/bridge/permission-request";
+        String callbackTxidUrl = "https://api.sygna.io/api/v1.1.0/bridge/txid";
+        String signature = "9bae1abb5864a5af4dbf3b5ca524fdc067b93247c7f120fd9056394290feb1d7016132a96a165992ad170346749b716a43efef01a6160bfebf26e1c2164ff02a";
 
         API api = new API(BENEFICIARY_API_KEY, DOMAIN);
-        JsonObject obj = api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, beneficiaryEndpointUrl));
+        JsonObject obj = api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, callbackPermissionRequest_url, callbackTxidUrl));
         System.out.println("return:" + obj.toString());
         String status = obj.get("status").getAsString();
         assertEquals(status, "OK");
