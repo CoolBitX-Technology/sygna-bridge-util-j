@@ -5,23 +5,31 @@ import com.google.gson.annotations.SerializedName;
 
 public class BeneficiaryEndpointUrl extends Packet {
 
-    public BeneficiaryEndpointUrl(String signature, String vaspCode, String beneficiaryEndpointUrl) {
+    public BeneficiaryEndpointUrl(String signature, String vaspCode,
+            String callbackPermissionRequestUrl, String callbackTxIdUrl) {
         super(signature);
         this.vaspCode = vaspCode;
-        this.beneficiaryEndpointUrl = beneficiaryEndpointUrl;
+        this.callbackPermissionRequestUrl = callbackPermissionRequestUrl;
+        this.callbackTxIdUrl = callbackTxIdUrl;
     }
 
     @SerializedName("vasp_code")
     private String vaspCode;
-    @SerializedName("beneficiary_endpoint_url")
-    private String beneficiaryEndpointUrl = null;
+    @SerializedName("callback_permission_request_url")
+    private String callbackPermissionRequestUrl = null;
+    @SerializedName("callback_txid_url")
+    private String callbackTxIdUrl = null;
 
     public String getVaspCode() {
         return vaspCode;
     }
 
-    public String getBeneficiaryEndpointUrl() {
-        return beneficiaryEndpointUrl;
+    public String getCallbackPermissionRequestUrl() {
+        return callbackPermissionRequestUrl;
+    }
+
+    public String getCallbackTxIdUrl() {
+        return callbackTxIdUrl;
     }
 
     @Override
@@ -32,6 +40,7 @@ public class BeneficiaryEndpointUrl extends Packet {
 
     public void checkSignData() throws Exception {
         Validator.validateVaspCode(vaspCode);
-        Validator.validateUrl(beneficiaryEndpointUrl);
+        Validator.validateUrl(callbackPermissionRequestUrl);
+        Validator.validateUrl(callbackTxIdUrl);
     }
 }

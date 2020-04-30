@@ -22,5 +22,6 @@ public abstract class Field {
     public final static String TRANSACTION_CURRENCY = "transaction_currency";
     public final static String AMOUNT = "amount";
     public final static String VASP_CODE = "vasp_code";
-    public final static String BENEFICIARY_ENDPOINT_URL = "beneficiary_endpoint_url";
+    public final static String CALLBACK_PERMISSION_REQUEST_URL = "callback_permission_request_url";
+    public final static String CALLBACK_TXID_URL = "callback_txid_url";
 }

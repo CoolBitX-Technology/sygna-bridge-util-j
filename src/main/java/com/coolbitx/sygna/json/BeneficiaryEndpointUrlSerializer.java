@@ -24,7 +24,12 @@ public class BeneficiaryEndpointUrlSerializer implements JsonSerializer<Benefici
     public JsonElement serialize(BeneficiaryEndpointUrl src, Type typeOfSrc, JsonSerializationContext context) {
         JsonObject jsonObj = new JsonObject();
         jsonObj.addProperty(Field.VASP_CODE, src.getVaspCode());
-        jsonObj.addProperty(Field.BENEFICIARY_ENDPOINT_URL, src.getBeneficiaryEndpointUrl());
+        if (!StringUtil.isNullOrEmpty(src.getCallbackPermissionRequestUrl())) {
+            jsonObj.addProperty(Field.CALLBACK_PERMISSION_REQUEST_URL, src.getCallbackPermissionRequestUrl());
+        }
+        if (!StringUtil.isNullOrEmpty(src.getCallbackTxIdUrl())) {
+            jsonObj.addProperty(Field.CALLBACK_TXID_URL, src.getCallbackTxIdUrl());
+        }
         if (!StringUtil.isNullOrEmpty(src.getSignature())) {
             jsonObj.addProperty(Field.SIGNATURE, src.getSignature());
         }
