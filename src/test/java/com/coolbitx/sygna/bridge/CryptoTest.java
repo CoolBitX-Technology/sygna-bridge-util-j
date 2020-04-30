@@ -201,7 +201,7 @@ public class CryptoTest {
         boolean isVerified = Crypto.verifyObject(cloneSignedObj, PUBLIC_KEY);
         assertEquals(isVerified, true);
 
-        String expectedSignature = "9bae1abb5864a5af4dbf3b5ca524fdc067b93247c7f120fd9056394290feb1d7016132a96a165992ad170346749b716a43efef01a6160bfebf26e1c2164ff02a";
+        String expectedSignature = "dfd9cd0a52ae368d8e149985791cedc3a52960fb67df15d327d7b9221f3ec1677d9f673ef75151c6f4964294f9bdce3e2dfc87a269c4f2b0722a809ad9f67e00";
         String signature = signedObj.get("signature").getAsString();
         assertEquals(signature, expectedSignature);
     }
