@@ -455,4 +455,32 @@ public class ValidatorTest {
         }
     }
 
+    @Test
+    public void testValidateBeneficiaryEndpointUrl() {
+        String expectedErrorMessage = "Selecting one or more of the following property is mandatory: 'callbackPermissionRequestUrl', 'callbackTxIdUrl'";
+        String callbackPermissionRequestUrl = "https://api.sygna.io/api/v1.1.0/bridge/permission-request";
+        String callbackTxIdUrl = "https://api.sygna.io/api/v1.1.0/bridge/txid";
+        try {
+            Validator.validateBeneficiaryEndpointUrl(null, null);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            Validator.validateBeneficiaryEndpointUrl("", null);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            assertEquals(e.getMessage(), expectedErrorMessage);
+        }
+
+        try {
+            Validator.validateBeneficiaryEndpointUrl(callbackPermissionRequestUrl, null);
+            Validator.validateBeneficiaryEndpointUrl("", callbackTxIdUrl);
+            Validator.validateBeneficiaryEndpointUrl(callbackPermissionRequestUrl, callbackTxIdUrl);
+        } catch (Exception e) {
+            fail("Should not have thrown any exception");
+        }
+    }
+
 }

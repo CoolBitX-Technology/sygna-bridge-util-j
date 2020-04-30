@@ -114,4 +114,13 @@ public class Validator {
             throw new Exception("vaspCode length should NOT be shorter than 1");
         }
     }
+
+    public static void validateBeneficiaryEndpointUrl(
+            String callbackPermissionRequestUrl,
+            String callbackTxIdUrl) throws Exception {
+        if (StringUtil.isNullOrEmpty(callbackPermissionRequestUrl)
+                && StringUtil.isNullOrEmpty(callbackTxIdUrl)) {
+            throw new Exception("Selecting one or more of the following property is mandatory: 'callbackPermissionRequestUrl', 'callbackTxIdUrl'");
+        }
+    }
 }
