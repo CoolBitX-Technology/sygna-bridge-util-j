@@ -366,9 +366,9 @@ public class ApiTest {
     public void testPostBeneficiaryEndpointUrl() throws Exception {
         String vaspCode = "VASPUSNY1";
         String callbackPermissionRequest_url
-                = "https://api.sygna.io/api/v1.1.0/bridge/permission-request";
-        String callbackTxidUrl = "https://api.sygna.io/api/v1.1.0/bridge/txid";
-        String signature = "9bae1abb5864a5af4dbf3b5ca524fdc067b93247c7f120fd9056394290feb1d7016132a96a165992ad170346749b716a43efef01a6160bfebf26e1c2164ff02a";
+                = "https://test-api.sygna.io/sb/api/v1.1.0/bridge/transaction/permission-request";
+        String callbackTxidUrl = "https://test-api.sygna.io/sb/api/v1.1.0/bridge/transaction/txid";
+        String signature = "05a42299f6d97e96ac21ea2fd90dc4c9b1b42e553ea6e81111b8568a274fb1f6511fa2084eb28fb4a60a2dec3bd30ef987a7c399c04549b1a0f3bf5e6c99eb39";
 
         API api = new API(BENEFICIARY_API_KEY, DOMAIN);
         JsonObject obj = api.postBeneficiaryEndpointUrl(new BeneficiaryEndpointUrl(signature, vaspCode, callbackPermissionRequest_url, callbackTxidUrl));
