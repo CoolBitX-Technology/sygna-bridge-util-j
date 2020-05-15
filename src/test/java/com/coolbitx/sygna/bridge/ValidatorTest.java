@@ -238,9 +238,16 @@ public class ValidatorTest {
 
         try {
             Validator.validateRejectData(PermissionStatus.ACCEPTED.getStatus(), RejectCode.NULL, null);
-            Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), RejectCode.BVRC001, null);
-            Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), RejectCode.BVRC001, "");
-            Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), RejectCode.BVRC001, "unsupported_currency");
+            for (RejectCode l : RejectCode.values())
+            {
+                if(l == RejectCode.NULL || l == RejectCode.BVRC999)
+                {
+                    continue;
+                }
+                Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), l, null);
+                Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), l, "");
+                Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), l, "unsupported_currency");
+            }
             Validator.validateRejectData(PermissionStatus.REJECTED.getStatus(), RejectCode.BVRC999, "unsupported_currency");
         } catch (Exception e) {
             fail("unexpected exception was occured.");

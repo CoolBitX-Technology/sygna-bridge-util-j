@@ -11,6 +11,12 @@ public enum RejectCode {
     BVRC003("BVRC003"),
     @SerializedName("BVRC004")
     BVRC004("BVRC004"),
+    @SerializedName("BVRC005")
+    BVRC005("BVRC005"),
+    @SerializedName("BVRC006")
+    BVRC006("BVRC006"),
+    @SerializedName("BVRC007")
+    BVRC007("BVRC007"),
     @SerializedName("BVRC999")
     BVRC999("BVRC999"), NULL(null);
 
