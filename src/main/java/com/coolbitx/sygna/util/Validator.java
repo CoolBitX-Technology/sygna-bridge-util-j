@@ -122,5 +122,11 @@ public class Validator {
                 && StringUtil.isNullOrEmpty(callbackTxIdUrl)) {
             throw new Exception("Selecting one or more of the following property is mandatory: 'callbackPermissionRequestUrl', 'callbackTxIdUrl'");
         }
+        if (!StringUtil.isNullOrEmpty(callbackPermissionRequestUrl)) {
+            validateUrl(callbackPermissionRequestUrl);
+        }
+        if (!StringUtil.isNullOrEmpty(callbackTxIdUrl)) {
+            validateUrl(callbackTxIdUrl);
+        }
     }
 }

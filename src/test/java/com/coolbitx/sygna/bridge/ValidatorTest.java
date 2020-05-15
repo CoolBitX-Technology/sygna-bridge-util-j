@@ -475,6 +475,22 @@ public class ValidatorTest {
         }
 
         try {
+            Validator.validateBeneficiaryEndpointUrl("123", null);
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isMalformedURLException = (e instanceof MalformedURLException);
+            assertEquals(isMalformedURLException, true);
+        }
+
+        try {
+            Validator.validateBeneficiaryEndpointUrl(null, "123");
+            fail("expected exception was not occured.");
+        } catch (Exception e) {
+            boolean isMalformedURLException = (e instanceof MalformedURLException);
+            assertEquals(isMalformedURLException, true);
+        }
+
+        try {
             Validator.validateBeneficiaryEndpointUrl(callbackPermissionRequestUrl, null);
             Validator.validateBeneficiaryEndpointUrl("", callbackTxIdUrl);
             Validator.validateBeneficiaryEndpointUrl(callbackPermissionRequestUrl, callbackTxIdUrl);

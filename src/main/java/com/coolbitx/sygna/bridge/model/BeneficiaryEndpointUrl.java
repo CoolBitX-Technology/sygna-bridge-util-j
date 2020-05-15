@@ -40,7 +40,6 @@ public class BeneficiaryEndpointUrl extends Packet {
 
     public void checkSignData() throws Exception {
         Validator.validateVaspCode(vaspCode);
-        Validator.validateUrl(callbackPermissionRequestUrl);
-        Validator.validateUrl(callbackTxIdUrl);
+        Validator.validateBeneficiaryEndpointUrl(callbackPermissionRequestUrl,callbackTxIdUrl);
     }
 }
