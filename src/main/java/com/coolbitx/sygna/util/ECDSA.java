@@ -1,13 +1,10 @@
 package com.coolbitx.sygna.util;
 
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
-import java.security.PrivateKey;
-import java.security.SecureRandom;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
@@ -60,12 +57,12 @@ public class ECDSA {
     public static boolean verify(String message, String signature, String publicKey) throws Exception {
         Signature sign = Signature.getInstance("SHA256withECDSA");
         ECPublicKey ecPub = null;
-        ecPub = ECIES.getPublicKeyFromBytes(parseHexBinary(publicKey));
+        ecPub = ECIES.getPublicKeyFromBytes(Hex.decode(publicKey));
         sign.initVerify(ecPub);
         byte[] inputData;
         inputData = message.getBytes(StandardCharsets.UTF_8);
         sign.update(inputData);
-        byte[] derSignature = getDerEncodeSignature(parseHexBinary(signature));
+        byte[] derSignature = getDerEncodeSignature(Hex.decode(signature));
         boolean verifyResult = sign.verify(derSignature);
         return verifyResult;
     }

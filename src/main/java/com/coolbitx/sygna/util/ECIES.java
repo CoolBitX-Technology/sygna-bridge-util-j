@@ -1,8 +1,5 @@
 package com.coolbitx.sygna.util;
 
-import static javax.xml.bind.DatatypeConverter.parseHexBinary;
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
-
 import java.math.BigInteger;
 import java.nio.ByteBuffer;
 import java.nio.charset.StandardCharsets;
@@ -67,7 +64,7 @@ public class ECIES {
         KeyFactory kf = KeyFactory.getInstance("EC");
 
         // Read other's public key:
-        ECPublicKey ecPub = getPublicKeyFromBytes(parseHexBinary(publicKey));
+        ECPublicKey ecPub = getPublicKeyFromBytes(Hex.decode(publicKey));
 
         String fullPub = "04" + StringUtil.leftPadWithZeroes(ecPub.getW().getAffineX().toString(16), 64)
                 + StringUtil.leftPadWithZeroes(ecPub.getW().getAffineY().toString(16), 64);
@@ -104,10 +101,10 @@ public class ECIES {
         Mac mac = Mac.getInstance(secretKey.getAlgorithm());
         mac.init(secretKey);
         mac.update(iv);
-        mac.update(parseHexBinary(pubkey));
+        mac.update(Hex.decode(pubkey));
         mac.update(ciphertext);
         byte[] macResult = mac.doFinal();
-        result = pubkey + printHexBinary(macResult) + printHexBinary(ciphertext);
+        result = pubkey + Hex.encode(macResult) + Hex.encode(ciphertext);
 
         return result;
     }
@@ -140,7 +137,7 @@ public class ECIES {
         String ciphertext = encodedMsg.substring(130 + 40, encodedMsg.length());
         System.out.println("ciphertext:" + ciphertext);
 
-        PrivateKey ecPriv = getPrivateKey(parseHexBinary(privateKey));
+        PrivateKey ecPriv = getPrivateKey(Hex.decode(privateKey));
 
         // Read other's public key:
         ECPoint ecPoint = new ECPoint(new BigInteger(ephemX, 16), new BigInteger(ephemY, 16));
@@ -169,16 +166,16 @@ public class ECIES {
         StringBuilder ephemPublicKey = new StringBuilder("04");
         ephemPublicKey.append(ephemX);
         ephemPublicKey.append(ephemY);
-        mac.update(parseHexBinary(ephemPublicKey.toString()));
-        mac.update(parseHexBinary(ciphertext));
-        String bigMac = printHexBinary(mac.doFinal()).toUpperCase();
+        mac.update(Hex.decode(ephemPublicKey.toString()));
+        mac.update(Hex.decode(ciphertext));
+        String bigMac = Hex.encode(mac.doFinal()).toUpperCase();
         if (!macResult.equals(bigMac)) {
             throw new Exception("Mac invalid");
         }
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
         SecretKeySpec decryptSpec = new SecretKeySpec(decryptKey, "AES");
         cipher.init(Cipher.DECRYPT_MODE, decryptSpec, ivSpec);
-        byte[] plaintext = cipher.doFinal(parseHexBinary(ciphertext));
+        byte[] plaintext = cipher.doFinal(Hex.decode(ciphertext));
         result = new String(plaintext, StandardCharsets.UTF_8);
 
         return result;
@@ -213,7 +210,7 @@ public class ECIES {
         String ypub = point.getAffineY().toString(16);
         System.out.println("X-pub:" + xpub);
         System.out.println("Y-pub:" + ypub);
-        System.out.println("Compressed:" + printHexBinary(EC5Util.convertPoint(params, point, true).getEncoded(true)));
+        System.out.println("Compressed:" + Hex.encode(EC5Util.convertPoint(params, point, true).getEncoded(true)));
         ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
         ECPublicKey pk = (ECPublicKey) kf.generatePublic(pubKeySpec);
         return pk;
