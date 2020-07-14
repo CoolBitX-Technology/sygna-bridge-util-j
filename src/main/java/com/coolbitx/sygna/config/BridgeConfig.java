@@ -9,6 +9,6 @@ public class BridgeConfig {
     
     public static final int HTTP_TIMEOUT = 60000;
     public static final int EXPIRE_DATE_MIN_OFFSET = 60 * 3;
-    public static final String SYGNA_BRIDGE_API_URL = "https://api.sygna.io/";
-    public static final String SYGNA_BRIDGE_API_TEST_URL = "https://test-api.sygna.io/";
+    public static final String SYGNA_BRIDGE_API_DOMAIN = "https://api.sygna.io/";
+    public static final String SYGNA_BRIDGE_API_TEST_DOMAIN = "https://test-api.sygna.io/";
 }
