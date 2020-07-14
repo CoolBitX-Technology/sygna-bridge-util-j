@@ -1,24 +1,11 @@
 package com.coolbitx.sygna.bridge;
 
-import com.coolbitx.sygna.bridge.enums.RejectCode;
-import com.coolbitx.sygna.bridge.model.BeneficiaryEndpointUrl;
-import com.coolbitx.sygna.bridge.model.Callback;
 import com.coolbitx.sygna.bridge.model.Field;
-import com.coolbitx.sygna.bridge.model.Permission;
-import com.coolbitx.sygna.bridge.model.PermissionRequest;
-import com.coolbitx.sygna.bridge.model.Transaction;
-import com.coolbitx.sygna.bridge.model.Vasp;
 import com.coolbitx.sygna.config.BridgeConfig;
-import com.coolbitx.sygna.json.BeneficiaryEndpointUrlSerializer;
-import com.coolbitx.sygna.json.CallbackSerializer;
-import com.coolbitx.sygna.json.PermissionRequestSerializer;
-import com.coolbitx.sygna.json.PermissionSerializer;
-import com.coolbitx.sygna.json.TransactionSerializer;
 import com.coolbitx.sygna.util.ECDSA;
 import com.coolbitx.sygna.util.ECIES;
 import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 
 public class Crypto {
@@ -50,226 +37,53 @@ public class Crypto {
     }
 
     /**
-     *
-     * @param privateInfo
-     * @param transaction
-     * @param dataDt TimeStamp in ISO format: yyyy-mm-ddThh:mm:ss[.mmm]+0000
-     * @param privateKey
-     * @return { {@link Field#PRIVATE_INFO}: {@link String},
-     *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
-     *         {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
-            String privateKey) throws Exception {
-        return signPermissionRequest(privateInfo, transaction, dataDt, privateKey, 0l);
-    }
-
-    /**
-     *
-     * @param privateInfo
-     * @param transaction
-     * @param dataDt TimeStamp in ISO format: yyyy-mm-ddThh:mm:ss[.mmm]+0000
-     * @param expireDate epoch timestamp in milliseconds
-     * @param privateKey
-     * @return { {@link Field#PRIVATE_INFO}: {@link String},
-     *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
-     *         {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermissionRequest(String privateInfo, JsonObject transaction, String dataDt,
-            String privateKey, long expireDate) throws Exception {
-        PermissionRequest permissionRequest = new PermissionRequest(null, privateInfo, transaction, dataDt, expireDate);
-        return signPermissionRequest(permissionRequest, privateKey);
-    }
-
-    /**
+     * @see <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/data</a>
+     * 
      * @param permissionRequest
      * @param privateKey
-     * @return { {@link Field#PRIVATE_INFO}: {@link String},
-     *         {@link Field#TRANSACTION}: {@link JsonObject}, {@link Field#DATA_DT:
-     *         {@link String} }
+     * @return signed permissionRequest data
      * @throws Exception
      */
-    public static JsonObject signPermissionRequest(PermissionRequest permissionRequest,
+    public static JsonObject signPermissionRequest(JsonObject permissionRequest,
             String privateKey) throws Exception {
-        permissionRequest.checkSignData();
-        Gson gson = new GsonBuilder().registerTypeAdapter(PermissionRequest.class, new PermissionRequestSerializer()).create();
-        JsonObject obj = (JsonObject) gson.toJsonTree(permissionRequest, PermissionRequest.class);
-        return signObject(obj, privateKey);
+        return signObject(permissionRequest, privateKey);
     }
 
     /**
-     * @param callbackUrl
-     * @param privateKey
-     * @return { {@link Field#CALL_BACK_URL}: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signCallBack(String callbackUrl, String privateKey) throws Exception {
-        Callback callback = new Callback(null, callbackUrl);;
-        return signCallBack(callback, privateKey);
-    }
-
-    /**
+     * @see <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/callback</a>
+     * 
      * @param callback
      * @param privateKey
-     * @return { {@link Field#CALL_BACK_URL}: {@link String} }
+     * @return signed callback data
      * @throws Exception
      */
-    public static JsonObject signCallBack(Callback callback, String privateKey) throws Exception {
-        callback.checkSignData();
-        Gson gson = new GsonBuilder().registerTypeAdapter(Callback.class, new CallbackSerializer()).create();
-        JsonObject obj = (JsonObject) gson.toJsonTree(callback, Callback.class);
-        return signObject(obj, privateKey);
+    public static JsonObject signCallBack(JsonObject callback, String privateKey) throws Exception {
+        return signObject(callback, privateKey);
     }
 
     /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey)
-            throws Exception {
-        return signPermission(transferId, permissionStatus, privateKey, 0l, RejectCode.NULL, null);
-    }
-
-    /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @param expireDate epoch timestamp in milliseconds
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#EXPIRE_DATE}: {@link long},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate)
-            throws Exception {
-        return signPermission(transferId, permissionStatus, privateKey, expireDate, RejectCode.NULL, null);
-    }
-
-    /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @param rejectCode
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#REJECT_CODE}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, RejectCode rejectCode)
-            throws Exception {
-        return signPermission(transferId, permissionStatus, privateKey, 0l, rejectCode, null);
-    }
-
-    /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @param expireDate epoch timestamp in milliseconds
-     * @param rejectCode
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#EXPIRE_DATE}: {@link long},
-     *         {@link Field#REJECT_CODE}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode)
-            throws Exception {
-        return signPermission(transferId, permissionStatus, privateKey, expireDate, rejectCode, null);
-    }
-
-    /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @param rejectCode
-     * @param rejectMessage
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#REJECT_CODE}: {@link String},
-     *         {@link Field#REJECT_MESSAGE}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, RejectCode rejectCode, String rejectMessage)
-            throws Exception {
-        return signPermission(transferId, permissionStatus, privateKey, 0l, rejectCode, rejectMessage);
-    }
-
-    /**
-     * @param transferId
-     * @param permissionStatus
-     * @param privateKey
-     * @param expireDate epoch timestamp in milliseconds
-     * @param rejectCode
-     * @param rejectMessage
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#EXPIRE_DATE}: {@link long},
-     *         {@link Field#REJECT_CODE}: {@link String},
-     *         {@link Field#REJECT_MESSAGE}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signPermission(String transferId, String permissionStatus, String privateKey, long expireDate, RejectCode rejectCode, String rejectMessage)
-            throws Exception {
-        Permission permission = new Permission(null, transferId, permissionStatus, expireDate, rejectCode, rejectMessage);
-        return signPermission(permission, privateKey);
-    }
-
-    /**
+     * @see <a href="https://developers.sygna.io/reference#bridgepermission-3">Bridge/Permission</a>
+     * 
      * @param permission
      * @param privateKey
-     * @return { {@link Field#TRANSFER_ID}: {@link String},
-     *         {@link Field#PERMISSION_STATUS}: {@link String},
-     *         {@link Field#EXPIRE_DATE}: {@link long},
-     *         {@link Field#REJECT_CODE}: {@link String},
-     *         {@link Field#REJECT_MESSAGE}: {@link String},
-     *         {@link Field#FIELD_SIGNATURE: {@link String} }
+     * @return signed permission data
      * @throws Exception
      */
-    public static JsonObject signPermission(Permission permission, String privateKey)
+    public static JsonObject signPermission(JsonObject permission, String privateKey)
             throws Exception {
-        permission.checkSignData();
-        Gson gson = new GsonBuilder().registerTypeAdapter(Permission.class, new PermissionSerializer()).create();
-        JsonObject obj = (JsonObject) gson.toJsonTree(permission, Permission.class);
-        return signObject(obj, privateKey);
+        return signObject(permission, privateKey);
     }
 
     /**
-     * @param transferId
-     * @param txId
+     * @see <a href="https://developers.sygna.io/reference#bridgetransactionid-3">Bridge/TransactionID</a>
+     * @param transactionId
      * @param privateKey
-     * @return { {@link Field#TRANSFER_ID}: {@link String}, {@link Field#TX_ID}:
-     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @return signed txid data
      * @throws Exception
      */
-    public static JsonObject signTxId(String transferId, String txId, String privateKey) throws Exception {
-        Transaction transaction = new Transaction(transferId, txId, null);
-        return signTxId(transaction, privateKey);
-    }
-
-    /**
-     * @param transaction
-     * @param privateKey
-     * @return { {@link Field#TRANSFER_ID}: {@link String}, {@link Field#TX_ID}:
-     *         {@link String}, {@link Field#FIELD_SIGNATURE}: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signTxId(Transaction transaction, String privateKey) throws Exception {
-        transaction.checkSignData();
-        Gson gson = new GsonBuilder().registerTypeAdapter(Transaction.class, new TransactionSerializer()).create();
-        JsonObject obj = (JsonObject) gson.toJsonTree(transaction, Transaction.class);
-        return signObject(obj, privateKey);
+    public static JsonObject signTxId(JsonObject transactionId, String privateKey)
+            throws Exception {
+        return signObject(transactionId, privateKey);
     }
 
     /**
@@ -313,7 +127,7 @@ public class Crypto {
     public static boolean verifyObject(JsonObject obj, String publicKey) throws Exception {
         final String signature = obj.get(Field.SIGNATURE).getAsString();
         System.out.printf("Verify Signature:%s\n", signature);
-        obj.addProperty(Vasp.class.getDeclaredField(Field.SIGNATURE).getName(), "");
+        obj.addProperty(Field.SIGNATURE, "");
         Gson gson = new Gson();
         final String msg = gson.toJson(obj);
         System.out.printf("Message:\n%s\n", msg);
@@ -321,32 +135,14 @@ public class Crypto {
     }
 
     /**
-     * @param vaspCode
-     * @param callbackPermissionRequestUrl
-     * @param callbackTxIdUrl
-     * @param privateKey
-     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#CALLBACK_PERMISION_REQUEST_URL}:
-     *         {@link String}, {@link Field#CALLBACK_TXID_URL}: {@link String} }
-     *         {@link Field#FIELD_SIGNATURE}: {@link String} }
-     * @throws Exception
-     */
-    public static JsonObject signBeneficiaryEndpointUrl(String vaspCode, String callbackPermissionRequestUrl, String callbackTxIdUrl, String privateKey) throws Exception {
-        BeneficiaryEndpointUrl instance = new BeneficiaryEndpointUrl(null, vaspCode, callbackPermissionRequestUrl, callbackTxIdUrl);
-        return signBeneficiaryEndpointUrl(instance, privateKey);
-    }
-
-    /**
+     * @see <a href="https://developers.sygna.io/reference#bridgebeneficiaryendpointurl">Bridge/VASP/BeneficiaryEndpointUrl</a>
+     * 
      * @param beneficiaryEndpointUrl
      * @param privateKey
-     * @return { {@link Field#VASP_CODE}: {@link String}, {@link Field#CALLBACK_PERMISION_REQUEST_URL}:
-     *         {@link String}, {@link Field#CALLBACK_TXID_URL}: {@link String} }
-     *         {@link Field#FIELD_SIGNATURE}: {@link String} }
+     * @return signed beneficiaryEndpointUrl data
      * @throws Exception
      */
-    public static JsonObject signBeneficiaryEndpointUrl(BeneficiaryEndpointUrl beneficiaryEndpointUrl, String privateKey) throws Exception {
-        beneficiaryEndpointUrl.checkSignData();
-        Gson gson = new GsonBuilder().registerTypeAdapter(BeneficiaryEndpointUrl.class, new BeneficiaryEndpointUrlSerializer()).create();
-        JsonObject obj = (JsonObject) gson.toJsonTree(beneficiaryEndpointUrl, BeneficiaryEndpointUrl.class);
-        return signObject(obj, privateKey);
+    public static JsonObject signBeneficiaryEndpointUrl(JsonObject beneficiaryEndpointUrl,  String privateKey) throws Exception {
+        return signObject(beneficiaryEndpointUrl, privateKey);
     }
 }
