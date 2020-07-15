@@ -13,12 +13,6 @@ import org.junit.runners.Suite.SuiteClasses;
     CryptoTest.class, 
     EcdsaTest.class, 
     EciesTest.class, 
-    PermissionRequestSerializerTest.class,
-    PermissionSerializerTest.class,
-    TransactionSerializerTest.class,
-    CallbackSerializerTest.class,
-    BeneficiaryEndpointUrlSerializerTest.class,
-    ValidateTransactionSchemaTest.class, 
     ValidatorTest.class })
 public class AllTests {
 

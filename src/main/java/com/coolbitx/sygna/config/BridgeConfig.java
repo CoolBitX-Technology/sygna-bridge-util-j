@@ -3,10 +3,12 @@ package com.coolbitx.sygna.config;
 public class BridgeConfig {
 
     public static final String SYGNA_BRIDGE_CENTRAL_PUBKEY
-            = "043ffdbc1cbf3f30623bb44f769cdb44e933ba7765e9d29b9668c8c59e0b3036c64cbf0f8a8fab522a730e8fa1dbbc46fe2da9ca835d1c8b8efd7dbcf72157032d";
+            = "047b04ca933c0fccb7094af06bafb77e0fdd9264b45243cba0b72cd8f1bc8fc4e7454902d4bb6bad8ed4bc4dfae102858b6a7649e4febca0c5b266566aa4e59f12";
         public static final String SYGNA_BRIDGE_CENTRAL_PUBKEY_TEST
-            = "0481d6b1c12bf70eae997fc925f70cefc6a7fc9d7151cf466e86333fae44efd312404a979c9031df81fb77b9d907166960e50dc7f72ca6a65970d747a87ed0548f";
+            = "04a6936f2bc43773cb4874980518b3f681c004464d167aebdc9e305e10d6fb6cdacb27a22812453e6c51ceabff5b1e2d2196d81a8d3e8e71e907948b01a7ea9ac8";
     
     public static final int HTTP_TIMEOUT = 60000;
     public static final int EXPIRE_DATE_MIN_OFFSET = 60 * 3;
+    public static final String SYGNA_BRIDGE_API_DOMAIN = "https://api.sygna.io/";
+    public static final String SYGNA_BRIDGE_API_TEST_DOMAIN = "https://test-api.sygna.io/";
 }

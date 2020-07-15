@@ -11,3 +11,6 @@ build/
 logs/
 target/
 
+**/bin
+**/.metadata
+
