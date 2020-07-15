@@ -9,7 +9,7 @@ import org.junit.runners.Suite.SuiteClasses;
 
 @RunWith(Suite.class)
 @SuiteClasses({ 
-    ApiTest.class, 
+//    ApiTest.class, 
     CryptoTest.class, 
     EcdsaTest.class, 
     EciesTest.class, 
