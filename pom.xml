@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>io.sygna</groupId>
     <artifactId>sygna-bridge-util-j</artifactId>
-    <version>2.0.0</version>
+    <version>2.0.1</version>
     <name>sygna-bridge-util-j</name>
     <description>This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK</description>
     <url>https://github.com/CoolBitX-Technology/sygna-bridge-util-j</url>
