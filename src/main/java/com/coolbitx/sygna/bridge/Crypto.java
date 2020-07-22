@@ -11,16 +11,16 @@ import com.google.gson.JsonObject;
 public class Crypto {
 
     /**
-     * Encode private info object to hex string.
+     * encrypt private info object to hex string.
      *
      * @param data
      * @param publicKey
      * @return
      * @throws Exception
      */
-    public static String sygnaEncodePrivateObj(JsonObject data, String publicKey) throws Exception {
+    public static String encryptPrivateObj(JsonObject data, String publicKey) throws Exception {
         final String msgString = new Gson().toJson(data);
-        return ECIES.encode(msgString, publicKey);
+        return ECIES.encrypt(msgString, publicKey);
     }
 
     /**
@@ -31,9 +31,9 @@ public class Crypto {
      * @return
      * @throws Exception
      */
-    public static JsonObject sygnaDecodePrivateObj(String privateMsg, String privateKey) throws Exception {
-        final String decoded = ECIES.decode(privateMsg, privateKey);
-        return new Gson().fromJson(decoded, JsonObject.class);
+    public static JsonObject decryptPrivateObj(String privateMsg, String privateKey) throws Exception {
+        final String decrypted = ECIES.decrypt(privateMsg, privateKey);
+        return new Gson().fromJson(decrypted, JsonObject.class);
     }
 
     /**
