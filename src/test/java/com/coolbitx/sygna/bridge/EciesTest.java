@@ -12,20 +12,20 @@ public class EciesTest {
     private final static String PRIVATE_KEY = "bf76d2680f23f6fc28111afe0179b8704c8e203a5faa5112f8aa52721f78fe6a";
 
     @Test
-    public void testDecode() throws Exception {
+    public void testDecrypt() throws Exception {
         String msg = "qwer";
         // Encoded by JavaScript Sygna Bridge Util
-        String encoded = "045da28c71cc83e81b377891e04700bcd191bf600e44decefaa117c248754ec1fe30ddc9f4c373123b0fb8787d31372e9ec9889d27bfdb1fabc794a1f62b0606ba04859dc4ee6b3ee95fe28f7069d08e16de308440196df2f50eed83af3efb9f74d34c6a42";
-        String decoded = ECIES.decode(encoded, PRIVATE_KEY);
-        assertEquals(decoded, msg);
+        String encrypted = "045da28c71cc83e81b377891e04700bcd191bf600e44decefaa117c248754ec1fe30ddc9f4c373123b0fb8787d31372e9ec9889d27bfdb1fabc794a1f62b0606ba04859dc4ee6b3ee95fe28f7069d08e16de308440196df2f50eed83af3efb9f74d34c6a42";
+        String decrypted = ECIES.decrypt(encrypted, PRIVATE_KEY);
+        assertEquals(decrypted, msg);
     }
 
     @Test
     public void testEncode() throws Exception {
         String msg = "qwer";
-        String encoded = ECIES.encode(msg, PUBLIC_KEY);
-        String decoded = ECIES.decode(encoded, PRIVATE_KEY);
-        assertEquals(decoded, msg);
+        String encrypted = ECIES.encrypt(msg, PUBLIC_KEY);
+        String decrypted = ECIES.decrypt(encrypted, PRIVATE_KEY);
+        assertEquals(decrypted, msg);
     }
 
 }
