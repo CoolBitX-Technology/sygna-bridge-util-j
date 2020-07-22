@@ -5,6 +5,7 @@ This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK to help y
 ## Build Jar
 
 You can build Jar from source code or download jar files in artifacts directly from the [latest pipeline](https://gitlab.com/coolbitx/sygna/bridge/sygna-bridge-util-j/pipelines)
+
 ```shell
 mvn clean package
 ```
@@ -17,26 +18,26 @@ import com.coolbitx.sygna.bridge.*;
 
 ## Crypto
 
-Dealing with encoding, decoding, signing and verifying in Sygna Bridge.
+Dealing with encrypting, decrypting, signing and verifying in Sygna Bridge.
 
-### ECIES Encoding an Decoding
+### ECIES Encrypting an Decrypting
 
 During the communication of VASPs, there are some private information that must be encrypted. We use ECIES(Elliptic Curve Integrated Encryption Scheme) to securely encrypt these private data so that they can only be accessed by the recipient.
 
 ```java
-String sensitiveData = 
-"{" + 
-"    \"originator\": {" + 
-"        \"name\": \"Antoine Griezmann\"," + 
-"        \"date_of_birth\":\"1991-03-21\"" + 
-"    }," + 
-"    \"beneficiary\":{" + 
-"        \"name\": \"Leo Messi\"" + 
-"    }" + 
+String sensitiveData =
+"{" +
+"    \"originator\": {" +
+"        \"name\": \"Antoine Griezmann\"," +
+"        \"date_of_birth\":\"1991-03-21\"" +
+"    }," +
+"    \"beneficiary\":{" +
+"        \"name\": \"Leo Messi\"" +
+"    }" +
 "}";
 JsonObject sensitiveDataObj = new Gson().fromJson(sensitiveData, JsonObject.class);
-String privateInfo = Crypto.sygnaEncodePrivateObj(sensitiveDataObj, PUBLIC_KEY);
-JsonObject decodedPrivateInfo = Crypto.sygnaDecodePrivateObj(privateInfo, PRIVATE_KEY);
+String privateInfo = Crypto.encryptPrivateObj(sensitiveDataObj, PUBLIC_KEY);
+JsonObject decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE_KEY);
 
 ```
 
@@ -47,14 +48,14 @@ In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to crea
 The following example is the snippet of originator's signing process of `premissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```java
-String transaction = 
-"{" + 
-"    originator_vasp_code:\"10000\"," + 
-"    originator_addrs:[\"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D\"]," + 
-"    beneficiary_vasp_code:\"10001\"," + 
-"    beneficiary_addrs:[\"3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf\"]," + 
-"    transaction_currency:\"0x80000000\"," + 
-"    amount: 0.973" + 
+String transaction =
+"{" +
+"    originator_vasp_code:\"10000\"," +
+"    originator_addrs:[\"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D\"]," +
+"    beneficiary_vasp_code:\"10001\"," +
+"    beneficiary_addrs:[\"3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf\"]," +
+"    transaction_currency:\"0x80000000\"," +
+"    amount: 0.973" +
 "}";
 
 String dataDate = "2019-07-29T06:28:00Z";
@@ -85,7 +86,7 @@ API calls to communicate with Sygna Bridge server.
 We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```java
-String sbServer = "https://apis.sygna.io/sb/";
+String sbServer = "https://api.sygna.io/sb/";
 API API_UTIL = new API("api-key", sbServer);
 ```
 
@@ -104,7 +105,7 @@ String publicKey = API_UTIL.getVASPPublicKey("10298", verify);
 
 ### For Originator
 
-There are two API calls from **transaction originator** to Sygna Bridge Server defined in the protocol, which are `postPermissionRequest` and `postTransactionId`. 
+There are two API calls from **transaction originator** to Sygna Bridge Server defined in the protocol, which are `postPermissionRequest` and `postTransactionId`.
 
 The full logic of originator would be like the following:
 
@@ -123,7 +124,7 @@ privateSenderInfo.add("originator", originator);
 privateSenderInfo.add("beneficiary", beneficiary);
 
 String recipientPublicKey = API_UTIL.getVASPPublicKey("10298");
-String private_info = Crypto.sygnaEncodePrivateObj(privateSenderInfo, recipientPublicKey);
+String private_info = Crypto.encryptPrivateObj(privateSenderInfo, recipientPublicKey);
 
 JsonObject transaction = new JsonObject();
 JsonArray originator_addrs = new JsonArray();
