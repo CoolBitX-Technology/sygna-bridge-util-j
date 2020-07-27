@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 public class Crypto {
 
     /**
-     * encrypt private info object to hex string.
+     * Encrypt private info object to hex string.
      *
      * @param data
      * @param publicKey
@@ -24,7 +24,7 @@ public class Crypto {
     }
 
     /**
-     * Decode private info from recipient server.
+     * Decrypt private info from recipient server.
      *
      * @param privateMsg
      * @param privateKey
