@@ -113,7 +113,7 @@ public class ECIES {
      * Sygna Bridge ECIES Decrypt.
      *
      * @param encryptedMsg whole hex string encrypted by
-     * {@link ECIES#encode(String, String)}.
+     * {@link ECIES#encrypt(String, String)}.
      * @param privateKey
      * @return
      * @throws Exception
