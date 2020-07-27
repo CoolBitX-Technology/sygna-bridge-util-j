@@ -36,14 +36,14 @@ import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 public class ECIES {
 
     /**
-     * Sygna Bridge ECIES Encode.
+     * Sygna Bridge ECIES Encrypt.
      *
-     * @param msg text to encode (in {@link StandardCharsets#UTF_8} plain text)
+     * @param msg text to encrypt (in {@link StandardCharsets#UTF_8} plain text)
      * @param publicKey recipient's uncompressed publicKey in hex form
      * @return hex string of encoded private message
      * @throws Exception
      */
-    public static String encode(String msg, String publicKey) throws Exception {
+    public static String encrypt(String msg, String publicKey) throws Exception {
         String result = null;
         // add provider only if it's not in the JVM
         AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
@@ -110,15 +110,15 @@ public class ECIES {
     }
 
     /**
-     * Sygna Bridge ECIES Decode.
+     * Sygna Bridge ECIES Decrypt.
      *
-     * @param encodedMsg whole hex string encrypted by
+     * @param encryptedMsg whole hex string encrypted by
      * {@link ECIES#encode(String, String)}.
      * @param privateKey
      * @return
      * @throws Exception
      */
-    public static String decode(String encodedMsg, String privateKey) throws Exception {
+    public static String decrypt(String encryptedMsg, String privateKey) throws Exception {
         String result = null;
         AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
         parameters.init(new ECGenParameterSpec("secp256k1"));
@@ -130,11 +130,11 @@ public class ECIES {
         byte[] iv = ByteBuffer.allocate(16).putInt(0).array();
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
         // Decrypt
-        String ephemX = encodedMsg.substring(2, 66);
-        String ephemY = encodedMsg.substring(66, 130);
-        String macResult = encodedMsg.substring(130, 130 + 40).toUpperCase();
+        String ephemX = encryptedMsg.substring(2, 66);
+        String ephemY = encryptedMsg.substring(66, 130);
+        String macResult = encryptedMsg.substring(130, 130 + 40).toUpperCase();
         System.out.println("macResult:" + macResult);
-        String ciphertext = encodedMsg.substring(130 + 40, encodedMsg.length());
+        String ciphertext = encryptedMsg.substring(130 + 40, encryptedMsg.length());
         System.out.println("ciphertext:" + ciphertext);
 
         PrivateKey ecPriv = getPrivateKey(Hex.decode(privateKey));
