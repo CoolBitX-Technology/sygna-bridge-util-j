@@ -44,11 +44,11 @@ import com.coolbitx.sygna.bridge.*;
 
   
 
-Dealing with encoding, decoding, signing and verifying in Sygna Bridge.
+Dealing with encrypting, decrypting, signing and verifying in Sygna Bridge.
 
   
 
-### ECIES Encoding an Decoding
+### ECIES Encrypting an Decrypting
 
   
 
@@ -79,8 +79,8 @@ String  sensitiveData =
 "}";
 
 JsonObject  sensitiveDataObj = new  Gson().fromJson(sensitiveData, JsonObject.class);
-String  privateInfo = Crypto.sygnaEncodePrivateObj(sensitiveDataObj, PUBLIC_KEY);
-JsonObject  decodedPrivateInfo = Crypto.sygnaDecodePrivateObj(privateInfo, PRIVATE_KEY);
+String  privateInfo = Crypto.encryptPrivateObj(sensitiveDataObj, PUBLIC_KEY);
+JsonObject  decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE_KEY);
 
 ```
 
@@ -159,7 +159,7 @@ We use **baisc auth** with all the API calls. To simplify the process, we provid
 
 ```java
 
-String  sbServer = "https://apis.sygna.io/sb/";
+String  sbServer = "https://api.sygna.io/";
 API  API_UTIL = new  API("api-key", sbServer);
 
 ```
@@ -214,7 +214,7 @@ privateSenderInfo.add("originator", originator);
 privateSenderInfo.add("beneficiary", beneficiary);
 
 String  recipientPublicKey = API_UTIL.getVASPPublicKey("10298");
-String  privateInfo = Crypto.sygnaEncodePrivateObj(privateSenderInfo, recipientPublicKey);
+String  privateInfo = Crypto.encryptPrivateObj(privateSenderInfo, recipientPublicKey);
 
 JsonObject originatorAddr = new JsonObject();
 originatorAddr.addProperty(Field.ADDRESS, "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D");

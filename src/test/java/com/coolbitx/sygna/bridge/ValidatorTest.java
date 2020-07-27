@@ -5,9 +5,6 @@ import static org.junit.Assert.*;
 import org.junit.Test;
 
 import com.coolbitx.sygna.util.Validator;
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
 
 public class ValidatorTest {
     

@@ -18,7 +18,7 @@ public class CryptoTest {
     private final static String CALLBACK_URL = "https://api.sygna.io/v2/bridge/";
 
     @Test
-    public void testEncodeAndDecode() throws Exception {
+    public void testEncryptAndDecrypt() throws Exception {
         String sensitiveData
                 = "{"
                 + "    \"originator\": {"
@@ -30,8 +30,8 @@ public class CryptoTest {
                 + "    }"
                 + "}";
         JsonObject sensitiveDataObj = new Gson().fromJson(sensitiveData, JsonObject.class);
-        String privateInfo = Crypto.sygnaEncodePrivateObj(sensitiveDataObj, PUBLIC_KEY);
-        JsonObject decodedPrivateInfo = Crypto.sygnaDecodePrivateObj(privateInfo, PRIVATE_KEY);
+        String privateInfo = Crypto.encryptPrivateObj(sensitiveDataObj, PUBLIC_KEY);
+        JsonObject decodedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE_KEY);
         boolean isEqual = decodedPrivateInfo.equals(sensitiveDataObj);
         assertEquals(isEqual, true);
     }
