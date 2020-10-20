@@ -7,8 +7,14 @@ import com.coolbitx.sygna.util.ECIES;
 import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.security.Security;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Crypto {
+
+    static {
+        Security.addProvider(new BouncyCastleProvider());
+    }
 
     /**
      * Encrypt private info object to hex string.
@@ -37,8 +43,9 @@ public class Crypto {
     }
 
     /**
-     * @see <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/data</a>
-     * 
+     * @see
+     * <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/data</a>
+     *
      * @param permissionRequest
      * @param privateKey
      * @return signed permissionRequest data
@@ -50,8 +57,9 @@ public class Crypto {
     }
 
     /**
-     * @see <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/callback</a>
-     * 
+     * @see
+     * <a href="https://developers.sygna.io/reference#bridgepermissionrequest-3">Bridge/PermissionRequest/callback</a>
+     *
      * @param callback
      * @param privateKey
      * @return signed callback data
@@ -62,8 +70,9 @@ public class Crypto {
     }
 
     /**
-     * @see <a href="https://developers.sygna.io/reference#bridgepermission-3">Bridge/Permission</a>
-     * 
+     * @see
+     * <a href="https://developers.sygna.io/reference#bridgepermission-3">Bridge/Permission</a>
+     *
      * @param permission
      * @param privateKey
      * @return signed permission data
@@ -75,7 +84,8 @@ public class Crypto {
     }
 
     /**
-     * @see <a href="https://developers.sygna.io/reference#bridgetransactionid-3">Bridge/TransactionID</a>
+     * @see
+     * <a href="https://developers.sygna.io/reference#bridgetransactionid-3">Bridge/TransactionID</a>
      * @param transactionId
      * @param privateKey
      * @return signed txid data
@@ -135,14 +145,15 @@ public class Crypto {
     }
 
     /**
-     * @see <a href="https://developers.sygna.io/reference#bridgebeneficiaryendpointurl">Bridge/VASP/BeneficiaryEndpointUrl</a>
-     * 
+     * @see
+     * <a href="https://developers.sygna.io/reference#bridgebeneficiaryendpointurl">Bridge/VASP/BeneficiaryEndpointUrl</a>
+     *
      * @param beneficiaryEndpointUrl
      * @param privateKey
      * @return signed beneficiaryEndpointUrl data
      * @throws Exception
      */
-    public static JsonObject signBeneficiaryEndpointUrl(JsonObject beneficiaryEndpointUrl,  String privateKey) throws Exception {
+    public static JsonObject signBeneficiaryEndpointUrl(JsonObject beneficiaryEndpointUrl, String privateKey) throws Exception {
         return signObject(beneficiaryEndpointUrl, privateKey);
     }
 }
