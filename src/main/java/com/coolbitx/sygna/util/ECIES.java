@@ -210,7 +210,7 @@ public class ECIES {
         String ypub = point.getAffineY().toString(16);
         System.out.println("X-pub:" + xpub);
         System.out.println("Y-pub:" + ypub);
-        System.out.println("Compressed:" + Hex.encode(EC5Util.convertPoint(params, point, true).getEncoded(true)));
+        System.out.println("Compressed:" + Hex.encode(EC5Util.convertPoint(params, point).getEncoded(true)));
         ECPublicKeySpec pubKeySpec = new ECPublicKeySpec(point, params);
         ECPublicKey pk = (ECPublicKey) kf.generatePublic(pubKeySpec);
         return pk;
