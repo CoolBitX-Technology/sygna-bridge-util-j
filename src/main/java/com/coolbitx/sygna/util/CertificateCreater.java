@@ -38,6 +38,8 @@ import com.coolbitx.sygna.model.AttestationInformation;
 import com.coolbitx.sygna.model.NetkiMessages;
 
 public class CertificateCreater {
+    private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
+
     public static List<AttestationCertificate> gernateCertificate(
         String parentCertificatePem, 
         String parentPrivateKeyPem, 
@@ -84,7 +86,7 @@ public class CertificateCreater {
             // Sign the new KeyPair with the root cert Private Key
             // ContentSigner csrContentSigner = csrBuilder.build(keyPair.getPrivate());
             X509CertificateHolder issuedCertHolder = issuedCertBuilder.build(
-                new JCESigner(parentPrivateKey, "SHA256withRSA")
+                new JCESigner(parentPrivateKey, SIGNATURE_ALGORITHM)
             );
             X509Certificate issuedCert = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
 
@@ -125,7 +127,7 @@ public class CertificateCreater {
             String unsignedHexString = Hex.toHexString(sha256.digest());
 
             PrivateKey privKey = (PrivateKey) stringPemToObject(attestationCertificate.privateKeyPem);
-            Signature sigInstance = Signature.getInstance("SHA256withRSA");
+            Signature sigInstance = Signature.getInstance(SIGNATURE_ALGORITHM);
             sigInstance.initSign(privKey);
             sigInstance.update(unsignedHexString.getBytes());
             byte[] signature = sigInstance.sign();
@@ -149,7 +151,7 @@ public class CertificateCreater {
      * @return the CSR generated.
      */
     private static PKCS10CertificationRequest generateCSR(String principal, KeyPair keyPair) throws Exception {
-        JCESigner signer = new JCESigner(keyPair.getPrivate(), "SHA256withRSA");
+        JCESigner signer = new JCESigner(keyPair.getPrivate(), SIGNATURE_ALGORITHM);
 
         JcaPKCS10CertificationRequestBuilder csrBuilder = new JcaPKCS10CertificationRequestBuilder(
             new X500Name(principal), keyPair.getPublic()
@@ -226,14 +228,14 @@ public class CertificateCreater {
      * Method to create signature configuration for CSR.
      */
     public static class JCESigner implements ContentSigner {
-        private String algorithm = "SHA256withRSA".toLowerCase();
+        private String algorithm = SIGNATURE_ALGORITHM.toLowerCase();
         private Signature signature = null;
         private ByteArrayOutputStream outputStream = null;
         private HashMap<String, AlgorithmIdentifier> ALGORITHMS;
 
         public JCESigner(PrivateKey privateKey, String signatureAlgorithm) {
             this.ALGORITHMS = new HashMap<String, AlgorithmIdentifier>();
-            this.ALGORITHMS.put("SHA256withRSA".toLowerCase(), new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.113549.1.1.11")));
+            this.ALGORITHMS.put(SIGNATURE_ALGORITHM.toLowerCase(), new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.113549.1.1.11")));
             this.ALGORITHMS.put("SHA1withRSA".toLowerCase(), new AlgorithmIdentifier(new ASN1ObjectIdentifier("1.2.840.113549.1.1.5")));
             try {
                 this.outputStream = new ByteArrayOutputStream();
