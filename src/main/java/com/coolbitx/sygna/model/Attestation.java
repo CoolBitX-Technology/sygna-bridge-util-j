@@ -42,9 +42,9 @@ public enum Attestation {
     this.attType = id;
   }
 
-  public int val() {
-    return this.attType;
-  }
+  // public int val() {
+  //   return this.attType;
+  // }
 
   private boolean validateConstraint(IvmsConstraints ivmsConstraints) {
     if(ivmsConstraints == null) {
@@ -113,7 +113,7 @@ public enum Attestation {
         data64Characters = data;
     }
 
-    if (validateConstraint(ivmsConstraints)) {
+    if (!validateConstraint(ivmsConstraints)) {
         throw new Exception(
             String.format("IVMS constrain fail", ivmsConstraints)
         );

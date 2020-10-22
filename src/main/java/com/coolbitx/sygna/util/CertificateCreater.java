@@ -29,6 +29,7 @@ import java.security.spec.PKCS8EncodedKeySpec;
 import java.io.*;
 import java.util.*;
 import java.math.BigInteger;
+import java.nio.charset.StandardCharsets;
 
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
@@ -46,20 +47,10 @@ public class CertificateCreater {
         JsonArray attestations
     ) throws Exception {
         // read "root" certificate
-        CertificateFactory cf = CertificateFactory.getInstance("X.509");
-        List<X509Certificate> rootCerts = (List<X509Certificate>) cf.generateCertificates(
-            new ByteArrayInputStream(parentCertificatePem.getBytes("UTF_8"))
-        );
-        X509Certificate rootCert = rootCerts.get(0);
+        X509Certificate rootCert = (X509Certificate) CertificateCreater.stringPemToObject(parentCertificatePem);
         JcaX509CertificateHolder rootCertJca = new JcaX509CertificateHolder(rootCert);
-
-        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(
-            Base64.getDecoder().decode(parentPrivateKeyPem.getBytes("UTF_8"))
-        );
-        KeyFactory kf = KeyFactory.getInstance("RSA");
-        PrivateKey parentPrivateKey = kf.generatePrivate(keySpec);
+        PrivateKey parentPrivateKey = (PrivateKey) CertificateCreater.stringPemToObject(parentPrivateKeyPem);
         
-
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
 
@@ -78,7 +69,7 @@ public class CertificateCreater {
             AttestationInformation attInfo = gson.fromJson(attestation, AttestationInformation.class);
             String principal = attInfo.attestation.toPrinciple(
                 attInfo.data,
-                attInfo.ivmsConstraint
+                attInfo.ivmsConstraints
             );
 
             KeyPair keyPair = kpg.generateKeyPair();
@@ -184,7 +175,7 @@ public class CertificateCreater {
      * @param objectToParse one of PrivateKey / PublicKey / Certificate.
      * @return String in PEM format.
      */
-    private static String objectToPemString(Object objectToParse) throws Exception {
+    public static String objectToPemString(Object objectToParse) throws Exception {
         StringWriter stringWriter = new StringWriter();
         PemWriter pemWriter = new PemWriter(stringWriter);
         if(objectToParse instanceof PrivateKey) {
@@ -210,7 +201,7 @@ public class CertificateCreater {
      * @param stringToParse in PEM format representing one of PrivateKey / PublicKey / Certificate.
      * @return Object.
      */
-    private static Object stringPemToObject(String stringToParse) throws Exception {
+    public static Object stringPemToObject(String stringToParse) throws Exception {
         Security.addProvider(new BouncyCastleProvider());
 
         PEMParser pemParser = new PEMParser(new StringReader(stringToParse));
@@ -237,7 +228,7 @@ public class CertificateCreater {
     /**
      * Method to create signature configuration for CSR.
      */
-    private static class JCESigner implements ContentSigner {
+    public static class JCESigner implements ContentSigner {
         private String algorithm = "SHA256withRSA".toLowerCase();
         private Signature signature = null;
         private ByteArrayOutputStream outputStream = null;

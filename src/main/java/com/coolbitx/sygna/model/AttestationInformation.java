@@ -12,7 +12,7 @@ public class AttestationInformation {
   /**
    * The type of IVMS constraints
    */
-  public IvmsConstraints ivmsConstraint;
+  public IvmsConstraints ivmsConstraints;
 
   /**
    * Data associated to the attestation.
