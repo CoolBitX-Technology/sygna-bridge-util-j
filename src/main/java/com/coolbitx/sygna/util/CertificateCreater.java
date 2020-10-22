@@ -19,19 +19,16 @@ import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.protobuf.ByteString;
 
 import java.security.*;
-import java.security.spec.PKCS8EncodedKeySpec;
 import java.io.*;
 import java.util.*;
 import java.math.BigInteger;
-import java.nio.charset.StandardCharsets;
 
-import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
 
