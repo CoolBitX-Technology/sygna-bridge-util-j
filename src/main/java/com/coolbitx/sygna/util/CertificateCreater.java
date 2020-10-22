@@ -13,11 +13,16 @@ import org.bouncycastle.pkcs.jcajce.JcaPKCS10CertificationRequestBuilder;
 import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
+import org.bouncycastle.util.encoders.Hex;
+import org.bouncycastle.openssl.PEMParser;
+import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
+import org.bouncycastle.openssl.jcajce.JcaPEMKeyConverter;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 import com.google.gson.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.protobuf.ByteString;
 
 import java.security.*;
 import java.security.spec.PKCS8EncodedKeySpec;
@@ -29,8 +34,10 @@ import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
 
+import com.coolbitx.sygna.model.Attestation;
 import com.coolbitx.sygna.model.AttestationCertificate;
 import com.coolbitx.sygna.model.AttestationInformation;
+import com.coolbitx.sygna.model.NetkiMessages;
 
 public class CertificateCreater {
     public static List<AttestationCertificate> gernateCertificate(
@@ -104,19 +111,46 @@ public class CertificateCreater {
         return ret;
     }
 
-    public static JsonObject attestationCertificateToOwnersData(
+    public static NetkiMessages.Owner attestationCertificateToOwnersData(
         List<AttestationCertificate> attestationCertificates
-    ) {
+    ) throws Exception {
+        NetkiMessages.Owner.Builder owner = NetkiMessages.Owner.newBuilder();
+        owner.setPrimaryForTransaction(true);
+
         for (AttestationCertificate attestationCertificate : attestationCertificates) {
-            JsonObject obj = new JsonObject();
-            obj.addProperty("attestation", attestationCertificate.attestation);
-            obj.addProperty("pki_type", "x509+sha256");
-            obj.addProperty("pki_data", attestationCertificate.certificatePem);
+            // build prtobuf message
+            NetkiMessages.Attestation.Builder messageAttestationUnsignedBuilder = NetkiMessages.Attestation.newBuilder()
+                .setPkiType("x509+sha256")
+                .setPkiData(ByteString.copyFrom(attestationCertificate.certificatePem.getBytes()))
+                .setSignature(ByteString.copyFrom("".getBytes()));
+                
+            if(attestationCertificate.attestation != null) {
+                NetkiMessages.AttestationType attType = Attestation.valueOf(
+                    attestationCertificate.attestation
+                ).toAttestationType();
+                messageAttestationUnsignedBuilder.setAttestation(attType);
+            }
+            NetkiMessages.Attestation messageAttestationUnsigned = messageAttestationUnsignedBuilder.build();
+            byte[] unsignedByteArr = messageAttestationUnsigned.toByteArray();
+            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+            sha256.update(unsignedByteArr);
+            String unsignedHexString = Hex.toHexString(sha256.digest());
 
-            // sign with private key
+            PrivateKey privKey = (PrivateKey) stringPemToObject(attestationCertificate.privateKeyPem);
+            Signature sigInstance = Signature.getInstance("SHA256withRSA");
+            sigInstance.initSign(privKey);
+            sigInstance.update(unsignedHexString.getBytes());
+            byte[] signature = sigInstance.sign();
+            String base64Sig = Base64.getEncoder().encodeToString(signature);
 
+            NetkiMessages.Attestation finalAtt = NetkiMessages.Attestation.newBuilder()
+                .mergeFrom(messageAttestationUnsigned)
+                .setSignature(ByteString.copyFrom(base64Sig.getBytes()))
+                .build();
+            
+            owner.addAttestations(finalAtt);
         }
-        return new JsonObject();
+        return owner.build();
     }
 
     /**
@@ -171,6 +205,36 @@ public class CertificateCreater {
     }
 
     /**
+     * Transform String in PEM format to Object.
+     *
+     * @param stringToParse in PEM format representing one of PrivateKey / PublicKey / Certificate.
+     * @return Object.
+     */
+    private static Object stringPemToObject(String stringToParse) throws Exception {
+        Security.addProvider(new BouncyCastleProvider());
+
+        PEMParser pemParser = new PEMParser(new StringReader(stringToParse));
+        Object pemObject = pemParser.readObject();
+        if(pemObject instanceof X509CertificateHolder) {
+            return new JcaX509CertificateConverter().getCertificate(
+                (X509CertificateHolder) pemObject
+            );
+        }
+        if(pemObject instanceof PrivateKeyInfo) {
+            return new JcaPEMKeyConverter().getPrivateKey(
+                (PrivateKeyInfo) pemObject
+            );
+        }
+        if(pemObject instanceof SubjectPublicKeyInfo) {
+            return new JcaPEMKeyConverter().getPublicKey(
+                (SubjectPublicKeyInfo) pemObject
+            );
+        }
+        
+        throw new IllegalArgumentException("String not supported");
+    }
+
+    /**
      * Method to create signature configuration for CSR.
      */
     private static class JCESigner implements ContentSigner {
@@ -215,4 +279,3 @@ public class CertificateCreater {
         }
     }
 }
-

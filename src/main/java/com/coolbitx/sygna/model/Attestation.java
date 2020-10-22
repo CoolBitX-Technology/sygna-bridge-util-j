@@ -1,5 +1,7 @@
 package com.coolbitx.sygna.model;
 
+import com.coolbitx.sygna.model.NetkiMessages;
+
 /**
  * List of types of attestations supported.
  */
@@ -42,7 +44,7 @@ public enum Attestation {
 
   public int val() {
     return this.attType;
-  } 
+  }
 
   private boolean validateConstraint(IvmsConstraints ivmsConstraints) {
     if(ivmsConstraints == null) {
@@ -421,6 +423,76 @@ public enum Attestation {
             );
         default:
             throw new Exception("Unknown attestationType");
+    }
+  }
+
+  /**
+   * Transform Attestation to Messages.AttestationType.
+  */
+  public NetkiMessages.AttestationType toAttestationType() throws Exception {
+    switch (Attestation.values()[this.attType]) {
+        case LEGAL_PERSON_PRIMARY_NAME:
+          return NetkiMessages.AttestationType.LEGAL_PERSON_PRIMARY_NAME;
+        case LEGAL_PERSON_SECONDARY_NAME:
+          return NetkiMessages.AttestationType.LEGAL_PERSON_SECONDARY_NAME;
+        case ADDRESS_DEPARTMENT:
+          return NetkiMessages.AttestationType.ADDRESS_DEPARTMENT;
+        case ADDRESS_SUB_DEPARTMENT:
+          return NetkiMessages.AttestationType.ADDRESS_SUB_DEPARTMENT;
+        case ADDRESS_STREET_NAME:
+          return NetkiMessages.AttestationType.ADDRESS_STREET_NAME;
+        case ADDRESS_BUILDING_NUMBER:
+          return NetkiMessages.AttestationType.ADDRESS_BUILDING_NUMBER;
+        case ADDRESS_BUILDING_NAME:
+          return NetkiMessages.AttestationType.ADDRESS_BUILDING_NAME;
+        case ADDRESS_FLOOR:
+          return NetkiMessages.AttestationType.ADDRESS_FLOOR;
+        case ADDRESS_POSTBOX:
+          return NetkiMessages.AttestationType.ADDRESS_POSTBOX;
+        case ADDRESS_ROOM:
+          return NetkiMessages.AttestationType.ADDRESS_ROOM;
+        case ADDRESS_POSTCODE:
+          return NetkiMessages.AttestationType.ADDRESS_POSTCODE;
+        case ADDRESS_TOWN_NAME:
+          return NetkiMessages.AttestationType.ADDRESS_TOWN_NAME;
+        case ADDRESS_TOWN_LOCATION_NAME:
+          return NetkiMessages.AttestationType.ADDRESS_TOWN_LOCATION_NAME;
+        case ADDRESS_DISTRICT_NAME:
+          return NetkiMessages.AttestationType.ADDRESS_DISTRICT_NAME;
+        case ADDRESS_COUNTRY_SUB_DIVISION:
+          return NetkiMessages.AttestationType.ADDRESS_COUNTRY_SUB_DIVISION;
+        case ADDRESS_ADDRESS_LINE:
+          return NetkiMessages.AttestationType.ADDRESS_ADDRESS_LINE;
+        case ADDRESS_COUNTRY:
+          return NetkiMessages.AttestationType.ADDRESS_COUNTRY;
+        case NATURAL_PERSON_FIRST_NAME:
+          return NetkiMessages.AttestationType.NATURAL_PERSON_FIRST_NAME;
+        case NATURAL_PERSON_LAST_NAME:
+          return NetkiMessages.AttestationType.NATURAL_PERSON_LAST_NAME;
+        case BENEFICIARY_PERSON_FIRST_NAME:
+          return NetkiMessages.AttestationType.BENEFICIARY_PERSON_FIRST_NAME;
+        case BENEFICIARY_PERSON_LAST_NAME:
+          return NetkiMessages.AttestationType.BENEFICIARY_PERSON_LAST_NAME;
+        case BIRTH_DATE:
+          return NetkiMessages.AttestationType.BIRTH_DATE;
+        case BIRTH_PLACE:
+          return NetkiMessages.AttestationType.BIRTH_PLACE;
+        case COUNTRY_OF_RESIDENCE:
+          return NetkiMessages.AttestationType.COUNTRY_OF_RESIDENCE;
+        case ISSUING_COUNTRY:
+          return NetkiMessages.AttestationType.ISSUING_COUNTRY;
+        case NATIONAL_IDENTIFIER_NUMBER:
+          return NetkiMessages.AttestationType.NATIONAL_IDENTIFIER_NUMBER;
+        case NATIONAL_IDENTIFIER:
+          return NetkiMessages.AttestationType.NATIONAL_IDENTIFIER;
+        case ACCOUNT_NUMBER: 
+          return NetkiMessages.AttestationType.ACCOUNT_NUMBER;
+        case CUSTOMER_IDENTIFICATION:
+          return NetkiMessages.AttestationType.CUSTOMER_IDENTIFICATION;
+        case REGISTRATION_AUTHORITY:
+          return NetkiMessages.AttestationType.REGISTRATION_AUTHORITY;
+        default:
+          throw new Exception("Invalid attestation type");
     }
   }
 }
