@@ -14,6 +14,7 @@ import org.bouncycastle.util.io.pem.PemObject;
 import org.bouncycastle.util.io.pem.PemWriter;
 import org.bouncycastle.cert.X509v3CertificateBuilder;
 
+import com.google.gson.*;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -29,6 +30,7 @@ import java.security.cert.X509Certificate;
 import java.security.cert.Certificate;
 
 import com.coolbitx.sygna.model.AttestationCertificate;
+import com.coolbitx.sygna.model.AttestationInformation;
 
 public class CertificateCreater {
     public static List<AttestationCertificate> gernateCertificate(
@@ -64,7 +66,14 @@ public class CertificateCreater {
 
         List<AttestationCertificate> ret = new ArrayList<AttestationCertificate>();
         for (JsonElement attestation : attestations) {
-            String principal = attestationToPrincipal(attestation.getAsJsonObject());
+            // json object to class
+            Gson gson = new Gson();
+            AttestationInformation attInfo = gson.fromJson(attestation, AttestationInformation.class);
+            String principal = attInfo.attestation.toPrinciple(
+                attInfo.data,
+                attInfo.ivmsConstraint
+            );
+
             KeyPair keyPair = kpg.generateKeyPair();
             PKCS10CertificationRequest csr = generateCSR(principal, keyPair);
 
@@ -104,8 +113,8 @@ public class CertificateCreater {
             obj.addProperty("pki_type", "x509+sha256");
             obj.addProperty("pki_data", attestationCertificate.certificatePem);
 
-            // sign wuth private key
-            
+            // sign with private key
+
         }
         return new JsonObject();
     }
@@ -203,392 +212,6 @@ public class CertificateCreater {
                 gse.printStackTrace();
                 return null;
             }
-        }
-    }
-
-    private static String attestationToPrincipal(JsonObject attestation) throws Exception {
-        // extract data from json object
-        String attestationType = attestation.get("attestation").getAsString();
-        String ivmsConstraints = attestation.get("ivmsConstraints").getAsString();
-        String data = attestation.get("data").getAsString();
-
-        String data64Characters = "";
-        String extraData = "";
-
-        if (data.length() > 64) {
-            data64Characters = data.substring(0, 64);
-            extraData = data.substring(64, data.length());
-        } else {
-            data64Characters = data;
-        }
-
-        String ivmConstraintValue = ivmsConstraints == null ? ivmsConstraints : "";
-
-        if (validateIvmsConstraint(attestationType, ivmsConstraints)) {
-            throw new Exception(
-                String.format("IVMS constrain fail", ivmConstraintValue)
-            );
-        }
-
-        final String PRINCIPAL_STRING = "CN=%s, C=%s, L=%s, O=%s, OU=%s, ST=%s";
-        switch (attestationType) {
-            case "LEGAL_PERSON_PRIMARY_NAME": 
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "legalPersonName.primaryIdentifier",
-                    extraData,
-                    "legalPersonNameType",
-                    "legalPrimaryName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "LEGAL_PERSON_SECONDARY_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "legalPersonName.secondaryIdentifier",
-                    extraData,
-                    "legalPersonNameType",
-                    "legalSecondaryName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_DEPARTMENT":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.department",
-                    extraData,
-                    "department",
-                    "department",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_SUB_DEPARTMENT":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.subDepartment",
-                    extraData,
-                    "subDepartment",
-                    "subDepartment",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_STREET_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.streetName",
-                    extraData,
-                    "streetName",
-                    "streetName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_BUILDING_NUMBER":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.buildingNumber",
-                    extraData,
-                    "buildingNumber",
-                    "buildingNumber",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_BUILDING_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.buildingName",
-                    extraData,
-                    "buildingName",
-                    "buildingName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_FLOOR":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.floor",
-                    extraData,
-                    "floor",
-                    "floor",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_POSTBOX":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.postBox",
-                    extraData,
-                    "postBox",
-                    "postBox",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_ROOM":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.room",
-                    extraData,
-                    "room",
-                    "room",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_POSTCODE":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.postCode",
-                    extraData,
-                    "postCode",
-                    "postCode",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_TOWN_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.townName",
-                    extraData,
-                    "townName",
-                    "townName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_TOWN_LOCATION_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.townLocationName",
-                    extraData,
-                    "townLocationName",
-                    "townLocationName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_DISTRICT_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.districtName",
-                    extraData,
-                    "districtName",
-                    "districtName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_COUNTRY_SUB_DIVISION":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.countrySubDivision",
-                    extraData,
-                    "countrySubDivision",
-                    "countrySubDivision",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_ADDRESS_LINE":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.addressLine",
-                    extraData,
-                    "addressLine",
-                    "addressLine",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ADDRESS_COUNTRY":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "address.country",
-                    extraData,
-                    "country",
-                    "country",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "NATURAL_PERSON_FIRST_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "naturalName.secondaryIdentifier",
-                    extraData,
-                    "naturalPersonNameType",
-                    "naturalPersonFirstName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "NATURAL_PERSON_LAST_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "naturalName.primaryIdentifier",
-                    extraData,
-                    "naturalPersonNameType",
-                    "naturalPersonLastName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "BENEFICIARY_PERSON_FIRST_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "beneficiaryName.secondaryIdentifier",
-                    extraData,
-                    "beneficiaryPersonNameType",
-                    "beneficiaryPersonFirstName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "BENEFICIARY_PERSON_LAST_NAME":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "beneficiaryName.primaryIdentifier",
-                    extraData,
-                    "beneficiaryPersonNameType",
-                    "beneficiaryPersonLastName",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "BIRTH_DATE":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "naturalPerson.dateOfBirth",
-                    extraData,
-                    "dateInPast",
-                    "birthdate",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "BIRTH_PLACE":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "naturalPerson.placeOfBirth",
-                    extraData,
-                    "countryCode",
-                    "country",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "COUNTRY_OF_RESIDENCE":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "naturalPerson.countryOfResidence",
-                    extraData,
-                    "countryCode",
-                    "country",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ISSUING_COUNTRY":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "nationalIdentifier.countryOfIssue",
-                    extraData,
-                    "nationalIdentifierType",
-                    "nationalIdentifier",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "NATIONAL_IDENTIFIER_NUMBER":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "nationalIdentifier.number",
-                    extraData,
-                    "number",
-                    "documentNumber",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "NATIONAL_IDENTIFIER":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "nationalIdentifier.documentType",
-                    extraData,
-                    "nationalIdentifierType",
-                    "documentType",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "ACCOUNT_NUMBER":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "accountNumber",
-                    extraData,
-                    "accountNumber",
-                    "accountNumber",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "CUSTOMER_IDENTIFICATION":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "customerIdentification",
-                    extraData,
-                    "customerIdentification",
-                    "customerIdentification",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            case "REGISTRATION_AUTHORITY":
-                return String.format(
-                    PRINCIPAL_STRING,
-                    "registrationAuthority",
-                    extraData,
-                    "registrationAuthority",
-                    "registrationAuthority",
-                    data64Characters,
-                    ivmConstraintValue
-                );
-            default:
-                throw new Exception("Unknown attestationType");
-        }
-    }
-
-    private static Boolean validateIvmsConstraint(String attestationType, String ivmsConstraints) {
-        if(ivmsConstraints == null) {
-            return true;
-        }
-        switch (attestationType) {
-            case "LEGAL_PERSON_PRIMARY_NAME":
-            case "LEGAL_PERSON_SECONDARY_NAME":
-            case "NATURAL_PERSON_FIRST_NAME":
-            case "NATURAL_PERSON_LAST_NAME":
-            case "BENEFICIARY_PERSON_FIRST_NAME":
-            case "BENEFICIARY_PERSON_LAST_NAME":
-                return (
-                    ivmsConstraints == "ALIA" ||
-                    ivmsConstraints == "BIRT" ||
-                    ivmsConstraints == "MAID" ||
-                    ivmsConstraints == "LEGL" ||
-                    ivmsConstraints == "MISC"
-                );
-            case "ADDRESS_DEPARTMENT":
-            case "ADDRESS_SUB_DEPARTMENT":
-            case "ADDRESS_STREET_NAME":
-            case "ADDRESS_BUILDING_NUMBER":
-            case "ADDRESS_BUILDING_NAME":
-            case "ADDRESS_FLOOR":
-            case "ADDRESS_POSTBOX":
-            case "ADDRESS_ROOM":
-            case "ADDRESS_POSTCODE":
-            case "ADDRESS_TOWN_NAME":
-            case "ADDRESS_TOWN_LOCATION_NAME":
-            case "ADDRESS_DISTRICT_NAME":
-            case "ADDRESS_COUNTRY_SUB_DIVISION":
-            case "ADDRESS_ADDRESS_LINE":
-            case "ADDRESS_COUNTRY":
-                return (
-                    ivmsConstraints == "GEOG" ||
-                    ivmsConstraints == "BIZZ" ||
-                    ivmsConstraints == "HOME" 
-                );
-            case "Attestation.NATIONAL_IDENTIFIER":
-                return (
-                    ivmsConstraints == "CCPT" ||
-                    ivmsConstraints == "RAID" ||
-                    ivmsConstraints == "DRLC" ||
-                    ivmsConstraints == "FIIN" ||
-                    ivmsConstraints == "TXID" ||
-                    ivmsConstraints == "SOCS" ||
-                    ivmsConstraints == "IDCD" ||
-                    ivmsConstraints == "LEIX" ||
-                    ivmsConstraints == "MISC"
-                );
-            default:
-                return false;
         }
     }
 }
