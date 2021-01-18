@@ -2,11 +2,13 @@ package com.coolbitx.sygna.bridge;
 
 import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.config.BridgeConfig;
+import com.coolbitx.sygna.model.NetkiMessages;
 import com.coolbitx.sygna.util.ECDSA;
 import com.coolbitx.sygna.util.ECIES;
 import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import com.google.protobuf.util.JsonFormat;
 import java.security.Security;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
@@ -27,6 +29,34 @@ public class Crypto {
     public static String encryptPrivateObj(JsonObject data, String publicKey) throws Exception {
         final String msgString = new Gson().toJson(data);
         return ECIES.encrypt(msgString, publicKey);
+    }
+    
+     /**
+     * Encrypt private info object to hex string.
+     *
+     * @param data
+     * @param publicKey
+     * @return
+     * @throws Exception
+     */
+    public static String encryptPrivateObj(NetkiMessages.Originator data, String publicKey) throws Exception {
+        String jsonString = JsonFormat.printer().print(data);
+        JsonObject sensitiveDataObj = new Gson().fromJson(jsonString, JsonObject.class);
+        return encryptPrivateObj(sensitiveDataObj, publicKey);
+    }
+    
+    /**
+     * Encrypt private info object to hex string.
+     *
+     * @param data
+     * @param publicKey
+     * @return
+     * @throws Exception
+     */
+    public static String encryptPrivateObj(NetkiMessages.Beneficiary data, String publicKey) throws Exception {
+        String jsonString = JsonFormat.printer().print(data);
+        JsonObject sensitiveDataObj = new Gson().fromJson(jsonString, JsonObject.class);
+        return encryptPrivateObj(sensitiveDataObj, publicKey);
     }
 
     /**

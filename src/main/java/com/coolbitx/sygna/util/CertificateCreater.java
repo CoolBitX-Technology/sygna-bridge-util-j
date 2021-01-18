@@ -38,18 +38,19 @@ import com.coolbitx.sygna.model.AttestationInformation;
 import com.coolbitx.sygna.model.NetkiMessages;
 
 public class CertificateCreater {
+
     private static final String SIGNATURE_ALGORITHM = "SHA256withRSA";
 
-    public static List<AttestationCertificate> gernateCertificate(
-        String parentCertificatePem, 
-        String parentPrivateKeyPem, 
-        JsonArray attestations
+    public static List<AttestationCertificate> generateCertificate(
+            String parentCertificatePem,
+            String parentPrivateKeyPem,
+            JsonArray attestations
     ) throws Exception {
         // read "root" certificate
         X509Certificate rootCert = (X509Certificate) CertificateCreater.stringPemToObject(parentCertificatePem);
         JcaX509CertificateHolder rootCertJca = new JcaX509CertificateHolder(rootCert);
         PrivateKey parentPrivateKey = (PrivateKey) CertificateCreater.stringPemToObject(parentPrivateKeyPem);
-        
+
         KeyPairGenerator kpg = KeyPairGenerator.getInstance("RSA");
         kpg.initialize(2048);
 
@@ -67,77 +68,107 @@ public class CertificateCreater {
             Gson gson = new Gson();
             AttestationInformation attInfo = gson.fromJson(attestation, AttestationInformation.class);
             String principal = attInfo.attestation.toPrinciple(
-                attInfo.data,
-                attInfo.ivmsConstraints
+                    attInfo.data,
+                    attInfo.ivmsConstraints
             );
 
             KeyPair keyPair = kpg.generateKeyPair();
             PKCS10CertificationRequest csr = generateCSR(principal, keyPair);
 
             X509v3CertificateBuilder issuedCertBuilder = new X509v3CertificateBuilder(
-                rootCertJca.getSubject(),
-                new BigInteger(Long.toString(new SecureRandom().nextLong())),
-                startDate,
-                endDate,
-                csr.getSubject(),
-                csr.getSubjectPublicKeyInfo()
+                    rootCertJca.getSubject(),
+                    new BigInteger(Long.toString(new SecureRandom().nextLong())),
+                    startDate,
+                    endDate,
+                    csr.getSubject(),
+                    csr.getSubjectPublicKeyInfo()
             );
 
             // Sign the new KeyPair with the root cert Private Key
             // ContentSigner csrContentSigner = csrBuilder.build(keyPair.getPrivate());
             X509CertificateHolder issuedCertHolder = issuedCertBuilder.build(
-                new JCESigner(parentPrivateKey, SIGNATURE_ALGORITHM)
+                    new JCESigner(parentPrivateKey, SIGNATURE_ALGORITHM)
             );
             X509Certificate issuedCert = new JcaX509CertificateConverter().getCertificate(issuedCertHolder);
 
             // return signed cert and private key
             ret.add(new AttestationCertificate(
-                attestation.getAsJsonObject().get("attestation").getAsString(), 
-                objectToPemString(issuedCert), 
-                objectToPemString(keyPair.getPrivate())
+                    attestation.getAsJsonObject().get("attestation").getAsString(),
+                    objectToPemString(issuedCert),
+                    objectToPemString(keyPair.getPrivate())
             ));
         }
 
         return ret;
     }
 
-    public static NetkiMessages.Owner attestationCertificateToOwnersData(
-        List<AttestationCertificate> attestationCertificates
-    ) throws Exception {
-        NetkiMessages.Owner.Builder owner = NetkiMessages.Owner.newBuilder();
-        owner.setPrimaryForTransaction(true);
-
-        for (AttestationCertificate attestationCertificate : attestationCertificates) {
-            // build prtobuf message
-            NetkiMessages.Attestation.Builder messageAttestationUnsignedBuilder = NetkiMessages.Attestation.newBuilder()
+    private static NetkiMessages.Attestation generateAttestation(AttestationCertificate attestationCertificate) throws NoSuchAlgorithmException, Exception {
+        NetkiMessages.Attestation.Builder messageAttestationUnsignedBuilder = NetkiMessages.Attestation.newBuilder()
                 .setPkiType("x509+sha256")
                 .setPkiData(ByteString.copyFrom(attestationCertificate.certificatePem.getBytes()))
                 .setSignature(ByteString.copyFrom("".getBytes()));
-                
-            if(attestationCertificate.attestation != null) {
-                NetkiMessages.AttestationType attType = Attestation.valueOf(
+
+        if (attestationCertificate.attestation != null) {
+            NetkiMessages.AttestationType attType = Attestation.valueOf(
                     attestationCertificate.attestation
-                ).toAttestationType();
-                messageAttestationUnsignedBuilder.setAttestation(attType);
-            }
-            NetkiMessages.Attestation messageAttestationUnsigned = messageAttestationUnsignedBuilder.build();
-            byte[] unsignedByteArr = messageAttestationUnsigned.toByteArray();
-            MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
-            sha256.update(unsignedByteArr);
-            String unsignedHexString = Hex.toHexString(sha256.digest());
+            ).toAttestationType();
+            messageAttestationUnsignedBuilder.setAttestation(attType);
+        }
+        NetkiMessages.Attestation messageAttestationUnsigned = messageAttestationUnsignedBuilder.build();
+        byte[] unsignedByteArr = messageAttestationUnsigned.toByteArray();
+        MessageDigest sha256 = MessageDigest.getInstance("SHA-256");
+        sha256.update(unsignedByteArr);
+        String unsignedHexString = Hex.toHexString(sha256.digest());
 
-            PrivateKey privKey = (PrivateKey) stringPemToObject(attestationCertificate.privateKeyPem);
-            Signature sigInstance = Signature.getInstance(SIGNATURE_ALGORITHM);
-            sigInstance.initSign(privKey);
-            sigInstance.update(unsignedHexString.getBytes());
-            byte[] signature = sigInstance.sign();
-            String base64Sig = Base64.getEncoder().encodeToString(signature);
+        PrivateKey privKey = (PrivateKey) stringPemToObject(attestationCertificate.privateKeyPem);
+        Signature sigInstance = Signature.getInstance(SIGNATURE_ALGORITHM);
+        sigInstance.initSign(privKey);
+        sigInstance.update(unsignedHexString.getBytes());
+        byte[] signature = sigInstance.sign();
+        String base64Sig = Base64.getEncoder().encodeToString(signature);
 
-            NetkiMessages.Attestation finalAtt = NetkiMessages.Attestation.newBuilder()
+        NetkiMessages.Attestation finalAtt = NetkiMessages.Attestation.newBuilder()
                 .mergeFrom(messageAttestationUnsigned)
                 .setSignature(ByteString.copyFrom(base64Sig.getBytes()))
                 .build();
-            
+        return finalAtt;
+    }
+
+    /**
+     * Generate originator data with Netki format.
+     *
+     * @param attestationCertificates a list of attestation certificate
+     * @return originator data with Netki format
+     * @throws java.lang.Exception
+     */
+    public static NetkiMessages.Originator attestationCertificateToOriginatorData(
+            List<AttestationCertificate> attestationCertificates
+    ) throws Exception {
+        NetkiMessages.Originator.Builder owner = NetkiMessages.Originator.newBuilder();
+        owner.setPrimaryForTransaction(true);
+
+        for (AttestationCertificate attestationCertificate : attestationCertificates) {
+            NetkiMessages.Attestation finalAtt = generateAttestation(attestationCertificate);
+            owner.addAttestations(finalAtt);
+        }
+        return owner.build();
+    }
+
+    /**
+     * Generate beneficiary data with Netki format.
+     *
+     * @param attestationCertificates a list of attestation certificate
+     * @return beneficiary data with Netki format
+     * @throws java.lang.Exception
+     */
+    public static NetkiMessages.Beneficiary attestationCertificateToBeneficiaryData(
+            List<AttestationCertificate> attestationCertificates
+    ) throws Exception {
+        NetkiMessages.Beneficiary.Builder owner = NetkiMessages.Beneficiary.newBuilder();
+        owner.setPrimaryForTransaction(true);
+
+        for (AttestationCertificate attestationCertificate : attestationCertificates) {
+            NetkiMessages.Attestation finalAtt = generateAttestation(attestationCertificate);
             owner.addAttestations(finalAtt);
         }
         return owner.build();
@@ -154,15 +185,15 @@ public class CertificateCreater {
         JCESigner signer = new JCESigner(keyPair.getPrivate(), SIGNATURE_ALGORITHM);
 
         JcaPKCS10CertificationRequestBuilder csrBuilder = new JcaPKCS10CertificationRequestBuilder(
-            new X500Name(principal), keyPair.getPublic()
+                new X500Name(principal), keyPair.getPublic()
         );
         ExtensionsGenerator extensionsGenerator = new ExtensionsGenerator();
         extensionsGenerator.addExtension(
-            Extension.basicConstraints, true, new BasicConstraints(false)
+                Extension.basicConstraints, true, new BasicConstraints(false)
         );
         csrBuilder.addAttribute(
-            PKCSObjectIdentifiers.pkcs_9_at_extensionRequest,
-            extensionsGenerator.generate()
+                PKCSObjectIdentifiers.pkcs_9_at_extensionRequest,
+                extensionsGenerator.generate()
         );
 
         return csrBuilder.build(signer);
@@ -177,15 +208,15 @@ public class CertificateCreater {
     public static String objectToPemString(Object objectToParse) throws Exception {
         StringWriter stringWriter = new StringWriter();
         PemWriter pemWriter = new PemWriter(stringWriter);
-        if(objectToParse instanceof PrivateKey) {
+        if (objectToParse instanceof PrivateKey) {
             PrivateKey pk = (PrivateKey) objectToParse;
             pemWriter.writeObject(new PemObject("PRIVATE KEY", pk.getEncoded()));
         }
-        if(objectToParse instanceof PublicKey) {
+        if (objectToParse instanceof PublicKey) {
             PublicKey pubkey = (PublicKey) objectToParse;
             pemWriter.writeObject(new PemObject("PUBLIC KEY", pubkey.getEncoded()));
         }
-        if(objectToParse instanceof Certificate) {
+        if (objectToParse instanceof Certificate) {
             Certificate cert = (Certificate) objectToParse;
             pemWriter.writeObject(new PemObject("CERTIFICATE", cert.getEncoded()));
         }
@@ -197,7 +228,8 @@ public class CertificateCreater {
     /**
      * Transform String in PEM format to Object.
      *
-     * @param stringToParse in PEM format representing one of PrivateKey / PublicKey / Certificate.
+     * @param stringToParse in PEM format representing one of PrivateKey /
+     * PublicKey / Certificate.
      * @return Object.
      */
     public static Object stringPemToObject(String stringToParse) throws Exception {
@@ -205,22 +237,22 @@ public class CertificateCreater {
 
         PEMParser pemParser = new PEMParser(new StringReader(stringToParse));
         Object pemObject = pemParser.readObject();
-        if(pemObject instanceof X509CertificateHolder) {
+        if (pemObject instanceof X509CertificateHolder) {
             return new JcaX509CertificateConverter().getCertificate(
-                (X509CertificateHolder) pemObject
+                    (X509CertificateHolder) pemObject
             );
         }
-        if(pemObject instanceof PrivateKeyInfo) {
+        if (pemObject instanceof PrivateKeyInfo) {
             return new JcaPEMKeyConverter().getPrivateKey(
-                (PrivateKeyInfo) pemObject
+                    (PrivateKeyInfo) pemObject
             );
         }
-        if(pemObject instanceof SubjectPublicKeyInfo) {
+        if (pemObject instanceof SubjectPublicKeyInfo) {
             return new JcaPEMKeyConverter().getPublicKey(
-                (SubjectPublicKeyInfo) pemObject
+                    (SubjectPublicKeyInfo) pemObject
             );
         }
-        
+
         throw new IllegalArgumentException("String not supported");
     }
 
@@ -228,6 +260,7 @@ public class CertificateCreater {
      * Method to create signature configuration for CSR.
      */
     public static class JCESigner implements ContentSigner {
+
         private String algorithm = SIGNATURE_ALGORITHM.toLowerCase();
         private Signature signature = null;
         private ByteArrayOutputStream outputStream = null;
@@ -248,7 +281,7 @@ public class CertificateCreater {
 
         public AlgorithmIdentifier getAlgorithmIdentifier() {
             AlgorithmIdentifier id = this.ALGORITHMS.get(algorithm);
-            if(id == null) {
+            if (id == null) {
                 throw new IllegalArgumentException("Does not support algorithm: $algorithm");
             }
             return id;

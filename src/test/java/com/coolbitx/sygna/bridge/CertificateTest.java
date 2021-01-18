@@ -5,6 +5,7 @@ import org.junit.Test;
 import com.coolbitx.sygna.util.CertificateCreater;
 import com.coolbitx.sygna.model.AttestationCertificate;
 import com.coolbitx.sygna.model.NetkiMessages;
+import com.coolbitx.sygna.model.NetkiMessages.AttestationType;
 
 import org.bouncycastle.asn1.x500.X500Name;
 import org.bouncycastle.asn1.x509.BasicConstraints;
@@ -15,7 +16,6 @@ import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
-import org.bouncycastle.util.encoders.Base64;
 
 import java.math.BigInteger;
 import java.security.*;
@@ -26,6 +26,8 @@ import java.util.List;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class CertificateTest {
   private static final String BC_PROVIDER = "BC";
@@ -92,15 +94,25 @@ public class CertificateTest {
     att2.addProperty("data", "World");
     attestations.add(att2);
 
-    List<AttestationCertificate> atts = CertificateCreater.gernateCertificate(certPemString, privKeyString, attestations);
+    List<AttestationCertificate> atts = CertificateCreater.generateCertificate(certPemString, privKeyString, attestations);
     for (AttestationCertificate attestationCertificate : atts) {
       System.out.println(attestationCertificate.attestation);
       System.out.println(attestationCertificate.certificatePem);
       System.out.println(attestationCertificate.privateKeyPem);
     }
 
-    NetkiMessages.Owner owner = CertificateCreater.attestationCertificateToOwnersData(atts);
-    String sig1 = Base64.toBase64String(owner.getAttestations(0).getSignature().toByteArray());
-    System.out.println(sig1);
+    NetkiMessages.Originator originator = CertificateCreater.attestationCertificateToOriginatorData(atts);
+    assertTrue(originator.getPrimaryForTransaction());
+    assertEquals(originator.getAttestationsCount(),2);
+    assertEquals(originator.getAttestations(0).getAttestation(),AttestationType.LEGAL_PERSON_PRIMARY_NAME);
+    assertEquals(originator.getAttestations(0).getPkiType(),"x509+sha256");
+    assertEquals(originator.getAttestations(0).getPkiData().toStringUtf8(),atts.get(0).certificatePem); 
+
+    NetkiMessages.Beneficiary beneficiary = CertificateCreater.attestationCertificateToBeneficiaryData(atts);
+    assertTrue(beneficiary.getPrimaryForTransaction());
+    assertEquals(beneficiary.getAttestationsCount(),2);
+    assertEquals(beneficiary.getAttestations(0).getAttestation(),AttestationType.LEGAL_PERSON_PRIMARY_NAME);
+    assertEquals(beneficiary.getAttestations(0).getPkiType(),"x509+sha256");
+    assertEquals(beneficiary.getAttestations(0).getPkiData().toStringUtf8(),atts.get(0).certificatePem); 
   }
 }

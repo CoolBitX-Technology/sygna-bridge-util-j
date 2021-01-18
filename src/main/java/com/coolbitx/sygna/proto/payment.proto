@@ -5,9 +5,14 @@ package payments;
 option java_package = "com.coolbitx.sygna.model";
 option java_outer_classname = "NetkiMessages";
 
-message Owner {
+message Beneficiary {
   required bool primary_for_transaction = 1 [default = true];     // True if this is the primary account owner for this transaction, there can be only one primary owner per transaction
-  repeated Attestation attestations = 2;                          // All the owner attestations for the message
+  repeated Attestation attestations = 2;                          // All the Beneficiary attestations for the message
+}
+
+message Originator {
+  required bool primary_for_transaction = 1 [default = true];     // True if this is the primary account owner for this transaction, there can be only one primary owner per transaction
+  repeated Attestation attestations = 2;                          // All the Beneficiary attestations for the message
 }
 
 message Attestation {
