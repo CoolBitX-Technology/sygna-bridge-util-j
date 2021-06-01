@@ -7,13 +7,27 @@ import com.coolbitx.sygna.util.ECIES;
 import com.coolbitx.sygna.util.Validator;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import java.security.AlgorithmParameters;
+import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.Security;
+import java.security.spec.ECGenParameterSpec;
+import java.security.spec.InvalidParameterSpecException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 
 public class Crypto {
 
     static {
         Security.addProvider(new BouncyCastleProvider());
+       
+        try {
+             AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", "BC");
+            parameters.init(new ECGenParameterSpec("secp256k1"));
+        } catch (InvalidParameterSpecException | NoSuchAlgorithmException | NoSuchProviderException ex) {
+            Logger.getLogger(Crypto.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 
     /**
