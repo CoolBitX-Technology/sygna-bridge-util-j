@@ -1,7 +1,7 @@
 
 # Sygna Bridge Util Java (sygna-bridge-util-j)
 
-This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK to help you build servers/servies within Sygna Bridge Ecosystem. For more detail information, please see [Sygna Bridge](https://www.sygna.io/).
+This sygna-bridge-util-j library is a Java version of Sygna Bridge SDK to help you build servers/services within Sygna Bridge Ecosystem. For more detail information, please see [Sygna Bridge](https://www.sygna.io/).
 
 ## Build Jar
 
@@ -89,9 +89,9 @@ JsonObject  decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE
 
 ### Sign and Verify
 
-In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verfication, the order of key-value pair you put into the object is important.
+In Sygna Bridge, we use secp256k1 ECDSA over sha256 of utf-8 json string to create signature on every API call. Since you need to provide the identical utf-8 string during verification, the order of key-value pair you put into the object is important.
 
-The following example is the snippet of originator's signing process of `premissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
+The following example is the snippet of originator's signing process of `permissionRequest` API call. If you put the key `transaction` before `private_info` in the object, the verification will fail in the central server.
 
 ```java
 JsonObject originatorAddr = new JsonObject();
@@ -138,7 +138,7 @@ We provide different methods like `signPermissionRequest`, `signCallback()` to s
 
 API calls to communicate with Sygna Bridge server.
 
-We use **baisc auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
+We use **basic auth** with all the API calls. To simplify the process, we provide a API class to deal with authentication and post/ get request format.
 
 ```java
 
@@ -208,26 +208,26 @@ permissionRequestData.addProperty(Field.DATA_DT, dataDt);
   
 JsonObject permissionRequestObj = Crypto.signPermissionRequest(permissionRequestData, sender_privKey);
 
-String  callbackUrl = "a url to recevie data from beneficiary";
+String  callbackUrl = "a url to receive data from beneficiary";
 JsonObject callback = new JsonObject();
 callback.addProperty(Field.CALLBACK_URL, callbackUrl);
 
 JsonObject  callbackObj = Crypto.signCallBack(callback, sender_privKey);
 
-JsonObject tansferObj = new JsonObject();
-tansferObj.add(Field.DATA, permissionRequestObj);
-tansferObj.add(Field.CALLBACK, callbackObj);
+JsonObject transferObj = new JsonObject();
+transferObj.add(Field.DATA, permissionRequestObj);
+transferObj.add(Field.CALLBACK, callbackObj);
 
-JsonObject  obj = API_UTIL.postPermissionRequest(tansferObj);
+JsonObject  obj = API_UTIL.postPermissionRequest(transferObj);
 String  transfer_id = obj.get("transfer_id").getAsString();
 
-// Boradcast your transaction to blockchain after got and api reponse at your api server.
+// Broadcast your transaction to blockchain after got and api response at your api server.
 String  txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
 JsonObject txIdObj = new JsonObject();
-tansferObj.add(Field.TRANSFER_ID, transfer_id);
-tansferObj.add(Field.TX_ID, txid);
+transferObj.add(Field.TRANSFER_ID, transfer_id);
+transferObj.add(Field.TX_ID, txid);
 
 JsonObject  sendTxIdObj = Crypto.signTxId(transfer_id, txid, sender_privKey);
 JsonObject  result = API_UTIL.postTransactionId(sendTxIdObj);
@@ -236,17 +236,17 @@ JsonObject  result = API_UTIL.postTransactionId(sendTxIdObj);
 
 ### For Beneficiary
 
-There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm thet legitemacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
+There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm their legitimacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```java
 String  permission_status = PermissionStatus.ACCEPTED.getStatus();//or REJECTED
 
 JsonObject permissionObj = new JsonObject();
-tansferObj.add(Field.TRANSFER_ID, transfer_id);
-tansferObj.add(Field.PERMISSION_STATUS, permission_status);
+transferObj.add(Field.TRANSFER_ID, transfer_id);
+transferObj.add(Field.PERMISSION_STATUS, permission_status);
 
 JsonObject  signedPermissionObj = Crypto.signPermission(permissionObj, beneficiary_privKey);
-String  finalresult = API_UTIL.postPermission(signedPermissionObj);
+String  finalResult = API_UTIL.postPermission(signedPermissionObj);
 ```
 
-If you're trying to implement the beneficiary server on your own, we strongly recommand you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
+If you're trying to implement the beneficiary server on your own, we strongly recommend you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
