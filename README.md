@@ -250,3 +250,32 @@ String  finalResult = API_UTIL.postPermission(signedPermissionObj);
 ```
 
 If you're trying to implement the beneficiary server on your own, we strongly recommend you to take a look at our [Nodejs sample](https://github.com/CoolBitX-Technology/sygna-bridge-sample) to get a big picture of how it should behave in the ecosystem.
+
+## Run example
+If you want to run example to see how it work:
+* First make sure to fill correct information
+```java
+// example/src/main/java/io/sygna/bridge/sample/main.java
+public static final String ORIGINATOR_API_KEY = "{{ORIGINATOR_API_KEY}}";
+public static final String ORIGINATOR_PRIVATE_KEY = "{{ORIGINATOR_PRIVATE_KEY}}";
+public static final String ORIGINATOR_PUBLIC_KEY = "{{ORIGINATOR_PUBLIC_KEY}}";
+
+public static final String BENEFICIARY_API_KEY = "{{BENEFICIARY_API_KEY}}";
+public static final String BENEFICIARY_PRIVATE_KEY = "{{BENEFICIARY_PRIVATE_KEY}}";
+public static final String BENEFICIARY_PUBLIC_KEY = "{{BENEFICIARY_PUBLIC_KEY}}";
+```
+* Choose function you want to test
+```java
+// example/src/main/java/io/sygna/bridge/sample/main.java
+public static void main(String args[]) throws Exception {
+  testSignAndVerify();
+}
+```
+* Build example project
+```
+mvn -f example clean package
+```
+* And run
+```bash
+java -cp  ./example/target/bridge-sample-2.0.0-jar-with-dependencies.jar io.sygna.bridge.sample.main
+```
