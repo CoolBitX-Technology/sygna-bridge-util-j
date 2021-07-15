@@ -100,7 +100,6 @@ public class main {
 
     private static void testEncodeAndVerify() throws Exception {
         JsonParser parser = new JsonParser();
-        // from example above
         JsonObject sensitiveData = parser.parse(SENSITIVE_DATA).getAsJsonObject();
         String privateInfo = Crypto.encryptPrivateObj(sensitiveData, ORIGINATOR_PUBLIC_KEY);
         JsonObject decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, ORIGINATOR_PRIVATE_KEY);
@@ -150,7 +149,6 @@ public class main {
         API api = new API(ORIGINATOR_API_KEY, BridgeConfig.SYGNA_BRIDGE_API_TEST_DOMAIN);
 
         JsonParser parser = new JsonParser();
-        // from example above
         JsonObject sensitiveData = parser.parse(SENSITIVE_DATA).getAsJsonObject();
         String privateInfo = Crypto.encryptPrivateObj(sensitiveData, BENEFICIARY_PUBLIC_KEY);
 
