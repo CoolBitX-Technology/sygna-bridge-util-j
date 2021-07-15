@@ -27,6 +27,53 @@ public class main {
     public static final String BENEFICIARY_PRIVATE_KEY = "{{BENEFICIARY_PRIVATE_KEY}}";
     public static final String BENEFICIARY_PUBLIC_KEY = "{{BENEFICIARY_PUBLIC_KEY}}";
 
+    public static final String SENSITIVE_DATA = "{" +
+    "  \"originator\": {" +
+    "    \"originator_persons\": [" +
+    "      {" +
+    "        \"natural_person\": {" +
+    "          \"name\": {" +
+    "            \"name_identifiers\": [" +
+    "              {" +
+    "                \"primary_identifier\": \"Wu Xinli\"," +
+    "                \"name_identifier_type\": \"LEGL\"" +
+    "              }" +
+    "            ]" +
+    "          }," +
+    "          \"national_identification\": {" +
+    "            \"national_identifier\": \"446005\"," +
+    "            \"national_identifier_type\": \"RAID\"," +
+    "            \"registration_authority\": \"RA000553\"" +
+    "          }," +
+    "          \"country_of_residence\": \"TZ\"" +
+    "        }" +
+    "      }" +
+    "    ]," +
+    "    \"account_numbers\": [" +
+    "      \"3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D\"" +
+    "    ]" +
+    "  }," +
+    "  \"beneficiary\": {" +
+    "    \"beneficiary_persons\": [" +
+    "      {" +
+    "        \"legal_person\": {" +
+    "          \"name\": {" +
+    "            \"name_identifiers\": [" +
+    "              {" +
+    "                \"legal_person_name\": \"ABC Limited\"," +
+    "                \"legal_person_name_identifier_type\": \"LEGL\"" +
+    "              }" +
+    "            ]" +
+    "          }" +
+    "        }" +
+    "      }" +
+    "    ]," +
+    "    \"account_numbers\": [" +
+    "      \"3F4ReDwiMLu8LrAiXwwD2DhH8U9xMrUzUf\"" +
+    "    ]" +
+    "  }" +
+    "}";
+
     public static void main(String args[]) throws Exception {
         testSignAndVerify();
 //        testEncodeAndVerify();
@@ -52,17 +99,9 @@ public class main {
     }
 
     private static void testEncodeAndVerify() throws Exception {
-        JsonObject originator = new JsonObject();
-        originator.addProperty("name", "Antoine Griezmann");
-        originator.addProperty("date_of_birth", "1991-03-21");
-
-        JsonObject beneficiary = new JsonObject();
-        beneficiary.addProperty("name", "Leo Messi");
-
-        JsonObject sensitiveData = new JsonObject();
-        sensitiveData.add("originator", originator);
-        sensitiveData.add("beneficiary", beneficiary);
-
+        JsonParser parser = new JsonParser();
+        // from example above
+        JsonObject sensitiveData = parser.parse(SENSITIVE_DATA).getAsJsonObject();
         String privateInfo = Crypto.encryptPrivateObj(sensitiveData, ORIGINATOR_PUBLIC_KEY);
         JsonObject decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, ORIGINATOR_PRIVATE_KEY);
         boolean isEqual = decryptedPrivateInfo.equals(sensitiveData);
@@ -110,17 +149,9 @@ public class main {
     private static void testPostPermissionRequest() throws Exception {
         API api = new API(ORIGINATOR_API_KEY, BridgeConfig.SYGNA_BRIDGE_API_TEST_DOMAIN);
 
-        JsonObject originator = new JsonObject();
-        originator.addProperty("name", "Antoine Griezmann");
-        originator.addProperty("date_of_birth", "1991-03-21");
-
-        JsonObject beneficiary = new JsonObject();
-        beneficiary.addProperty("name", "Leo Messi");
-
-        JsonObject sensitiveData = new JsonObject();
-        sensitiveData.add("originator", originator);
-        sensitiveData.add("beneficiary", beneficiary);
-
+        JsonParser parser = new JsonParser();
+        // from example above
+        JsonObject sensitiveData = parser.parse(SENSITIVE_DATA).getAsJsonObject();
         String privateInfo = Crypto.encryptPrivateObj(sensitiveData, BENEFICIARY_PUBLIC_KEY);
 
         String originatorVASPCode = "VASPUSNY1";

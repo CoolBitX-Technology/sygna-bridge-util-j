@@ -34,7 +34,7 @@ We're using [IVMS101 (interVASP Messaging Standard)](https://intervasp.org/) as 
 We also provide [IVMS101 Java Utility](https://github.com/CoolBitX-Technology/sygna-bridge-ivms-utils/tree/master/java) to construct data payload.
 
 ```java
-String  sensitiveData = "{" +
+String sensitiveData = "{" +
 "  \"originator\": {" +
 "    \"originator_persons\": [" +
 "      {" +
@@ -81,9 +81,9 @@ String  sensitiveData = "{" +
 "  }" +
 "}";
 
-JsonObject  sensitiveDataObj = new  Gson().fromJson(sensitiveData, JsonObject.class);
-String  privateInfo = Crypto.encryptPrivateObj(sensitiveDataObj, PUBLIC_KEY);
-JsonObject  decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE_KEY);
+JsonObject sensitiveDataObj = new Gson().fromJson(sensitiveData, JsonObject.class);
+String privateInfo = Crypto.encryptPrivateObj(sensitiveDataObj, PUBLIC_KEY);
+JsonObject decryptedPrivateInfo = Crypto.decryptPrivateObj(privateInfo, PRIVATE_KEY);
 
 ```
 
@@ -114,13 +114,13 @@ JsonObject beneficiaryVASP = new JsonObject();
 beneficiaryVASP.addProperty(Field.VASP_CODE, "VASPUSNY2");
 beneficiaryVASP.add(Field.ADDRS, beneficiaryAddrs);
 
-JsonObject  transaction = new  JsonObject();
+JsonObject transaction = new JsonObject();
 transaction.add(Field.ORIGINATOR_VASP, originatorVASP);
 transaction.add(Field.BENEFICIARY_VASP, beneficiaryVASP);
 transaction.addProperty(Field.CURRENCY_ID, "sygna:0x80000090");
 transaction.addProperty(Field.AMOUNT, "0.973");
   
-String  dataDate = "2019-07-29T06:28:00Z";
+String dataDate = "2019-07-29T06:28:00Z";
 
 // using signPermissionRequest to get a valid signed object (with signature attached)
 JsonObject obj = new JsonObject();
@@ -128,7 +128,7 @@ obj.addProperty(Field.PRIVATE_INFO, privateInfo);
 obj.add(Field.TRANSACTION, transaction);
 obj.addProperty(Field.DATA_DT, dataDt);
 
-JsonObject  signedObj = Crypto.signPermissionRequest(privateInfo, transaction, dataDate, originatorPrivateKey);
+JsonObject signedObj = Crypto.signPermissionRequest(privateInfo, transaction, dataDate, originatorPrivateKey);
 valid = Crypto.verifyObject(signedObj, originatorPublicKey);
 ```
 
@@ -142,8 +142,8 @@ We use **basic auth** with all the API calls. To simplify the process, we provid
 
 ```java
 
-String  sbServer = "https://api.sygna.io/";
-API  API_UTIL = new  API("api-key", sbServer);
+String sbServer = "https://api.sygna.io/";
+API API_UTIL = new API("api-key", sbServer);
 
 ```
 
@@ -153,11 +153,11 @@ After you create the `API` instance, you can use it to make any API call to comm
 
 ```java
 // Get List of VASPs associated with public keys.
-boolean  verify = true  // set verify to true to verify the signature attached with api response automatically.
+boolean verify = true // set verify to true to verify the signature attached with api response automatically.
 JsonArray vasps = API_UTIL.getVASPList(verify);
 
 // Or call use getVASPPublicKey() to directly get public key for a specific VASP.
-String  publicKey = API_UTIL.getVASPPublicKey("10298", verify);
+String publicKey = API_UTIL.getVASPPublicKey("10298", verify);
 ```
 
 ### For Originator
@@ -171,8 +171,8 @@ JsonParser parser = new JsonParser();
 // from example above
 JsonObject privateSenderInfo = parser.parse(sensitiveData).getAsJsonObject();
 
-String  recipientPublicKey = API_UTIL.getVASPPublicKey("10298");
-String  privateInfo = Crypto.encryptPrivateObj(privateSenderInfo, recipientPublicKey);
+String recipientPublicKey = API_UTIL.getVASPPublicKey("10298");
+String privateInfo = Crypto.encryptPrivateObj(privateSenderInfo, recipientPublicKey);
 
 JsonObject originatorAddr = new JsonObject();
 originatorAddr.addProperty(Field.ADDRESS, "3KvJ1uHPShhEAWyqsBEzhfXyeh1TXKAd7D");
@@ -194,43 +194,43 @@ JsonObject beneficiaryVASP = new JsonObject();
 beneficiaryVASP.addProperty(Field.VASP_CODE, "VASPUSNY2");
 beneficiaryVASP.add(Field.ADDRS, beneficiaryAddrs);
 
-JsonObject  transaction = new  JsonObject();
+JsonObject transaction = new JsonObject();
 transaction.add(Field.ORIGINATOR_VASP, originatorVASP);
 transaction.add(Field.BENEFICIARY_VASP, beneficiaryVASP);
 transaction.addProperty(Field.CURRENCY_ID, "sygna:0x80000090");
 transaction.addProperty(Field.AMOUNT, "0.973");
 
-String  dataDt = "2019-07-29T07:29:80Z"
+String dataDt = "2019-07-29T07:29:80Z"
 JsonObject permissionRequestData = new JsonObject();
 permissionRequestData.addProperty(Field.PRIVATE_INFO, privateInfo);
 permissionRequestData.add(Field.TRANSACTION, transaction);
 permissionRequestData.addProperty(Field.DATA_DT, dataDt);
-  
+
 JsonObject permissionRequestObj = Crypto.signPermissionRequest(permissionRequestData, sender_privKey);
 
-String  callbackUrl = "a url to receive data from beneficiary";
+String callbackUrl = "a url to receive data from beneficiary";
 JsonObject callback = new JsonObject();
 callback.addProperty(Field.CALLBACK_URL, callbackUrl);
 
-JsonObject  callbackObj = Crypto.signCallBack(callback, sender_privKey);
+JsonObject callbackObj = Crypto.signCallBack(callback, sender_privKey);
 
 JsonObject transferObj = new JsonObject();
 transferObj.add(Field.DATA, permissionRequestObj);
 transferObj.add(Field.CALLBACK, callbackObj);
 
-JsonObject  obj = API_UTIL.postPermissionRequest(transferObj);
-String  transfer_id = obj.get("transfer_id").getAsString();
+JsonObject obj = API_UTIL.postPermissionRequest(transferObj);
+String transfer_id = obj.get("transfer_id").getAsString();
 
 // Broadcast your transaction to blockchain after got and api response at your api server.
-String  txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
+String txid = "1a0c9bef489a136f7e05671f7f7fada2b9d96ac9f44598e1bcaa4779ac564dcd";
 
 // Inform Sygna Bridge that a specific transfer is successfully broadcasted to the blockchain.
 JsonObject txIdObj = new JsonObject();
 transferObj.add(Field.TRANSFER_ID, transfer_id);
 transferObj.add(Field.TX_ID, txid);
 
-JsonObject  sendTxIdObj = Crypto.signTxId(transfer_id, txid, sender_privKey);
-JsonObject  result = API_UTIL.postTransactionId(sendTxIdObj);
+JsonObject sendTxIdObj = Crypto.signTxId(transfer_id, txid, sender_privKey);
+JsonObject result = API_UTIL.postTransactionId(sendTxIdObj);
 
 ```
 
@@ -239,18 +239,18 @@ JsonObject  result = API_UTIL.postTransactionId(sendTxIdObj);
 There is only one api for Beneficiary VASP to call, which is `postPermission`. After the beneficiary server confirm their legitimacy of a transfer request, they will sign `{ transfer_id, permission_status }` using `signPermission()` function, and send the result with signature to Sygna Bridge Central Server.
 
 ```java
-String  permission_status = PermissionStatus.ACCEPTED.getStatus();//or REJECTED
+String permission_status = PermissionStatus.ACCEPTED.getStatus();//or REJECTED
 
 JsonObject permissionObj = new JsonObject();
 transferObj.add(Field.TRANSFER_ID, transfer_id);
 transferObj.add(Field.PERMISSION_STATUS, permission_status);
 
-JsonObject  signedPermissionObj = Crypto.signPermission(permissionObj, beneficiary_privKey);
-String  finalResult = API_UTIL.postPermission(signedPermissionObj);
+JsonObject signedPermissionObj = Crypto.signPermission(permissionObj, beneficiary_privKey);
+String finalResult = API_UTIL.postPermission(signedPermissionObj);
 ```
 
 ## Build and run example
 ```
 mvn -f example clean package
-java -cp  ./example/target/bridge-sample-2.0.0-jar-with-dependencies.jar io.sygna.bridge.sample.main
+java -cp ./example/target/bridge-sample-2.0.0-jar-with-dependencies.jar io.sygna.bridge.sample.main
 ```
