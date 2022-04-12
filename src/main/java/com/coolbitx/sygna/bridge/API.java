@@ -182,35 +182,39 @@ public class API {
         return postSB(url, data);
     }
 
-    /**
-     * HTTP Post request to Sygna Bridge
-     *
-     * @param url
-     * @param obj
-     * @return
-     * @throws Exception
-     */
-    public JsonObject postSB(String url, JsonObject obj) throws Exception {
-        JsonObject headers = new JsonObject();
-        headers.addProperty("x-api-key", this.apiKey);
-        final JsonObject response = HttpClient.post(url, headers, obj, BridgeConfig.HTTP_TIMEOUT);
-        return response;
-    }
+	/**
+	 * HTTP Post request to Sygna Bridge
+	 *
+	 * @param url
+	 * @param obj
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonObject postSB(String url, JsonObject obj) throws Exception {
+		JsonObject headers = new JsonObject();
+		headers.addProperty("x-api-key", this.apiKey);
+		headers.addProperty("User-Agent", "sygna-java-util/2.0.4");
+		headers.addProperty("Accept", "application/json");
+		headers.addProperty("Content-type", "application/json");
+		final JsonObject response = HttpClient.post(url, headers, obj);
+		return response;
+	}
 
-    /**
-     * *
-     * HTTP GET request to Sygna Bridge
-     *
-     * @param url
-     * @return
-     * @throws Exception
-     */
-    public JsonObject getSB(String url) throws Exception {
-        JsonObject headers = new JsonObject();
-        headers.addProperty("x-api-key", this.apiKey);
-        final JsonObject response = HttpClient.get(url, headers, BridgeConfig.HTTP_TIMEOUT);
-        return response;
-    }
+	/**
+	 * * HTTP GET request to Sygna Bridge
+	 *
+	 * @param url
+	 * @return
+	 * @throws Exception
+	 */
+	public JsonObject getSB(String url) throws Exception {
+		JsonObject headers = new JsonObject();
+		headers.addProperty("x-api-key", this.apiKey);
+		headers.addProperty("User-Agent", "sygna-java-util/2.0.4");
+		headers.addProperty("Accept", "application/json");
+		JsonObject response = HttpClient.get(url, headers);
+		return response;
+	}
 
     /**
      * revise beneficiary endpoint url
