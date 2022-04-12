@@ -21,6 +21,13 @@ public class APITest {
 
 	@Test
 	public void testGetVASP() throws Exception {
+		if(API_KEY.equals("{{API_KEY}}")) {
+			System.out.print("Please fill your credential and run the test again");
+			assertEquals(true, true);
+			return;
+		}
+		
+		
 		JsonArray vasps = api.getVASPList(false, false);
 
 		System.out.printf("vasps = %s", vasps.toString());
@@ -45,6 +52,11 @@ public class APITest {
 
 	@Test
 	public void testPostBeneficiaryURL() throws Exception {
+		if(API_KEY.equals("{{API_KEY}}")) {
+			System.out.print("Please fill your credential and run the test again");
+			assertEquals(true, true);
+			return;
+		}
 		JsonArray vasps = api.getVASPList(false, false);
 		String callbackPermissionRequestUrl = CALLBACK_URL + "/permission-request";
 		String callbackTxIdUrl = CALLBACK_URL + "/txid";
