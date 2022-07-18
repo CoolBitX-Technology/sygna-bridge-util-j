@@ -1,10 +1,10 @@
 package com.coolbitx.sygna.util;
 
-
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
+import java.security.Security;
 import java.security.Signature;
 import java.security.interfaces.ECPublicKey;
 import java.util.Arrays;
@@ -21,6 +21,7 @@ import org.bouncycastle.asn1.ASN1Integer;
 import org.bouncycastle.asn1.ASN1Primitive;
 import org.bouncycastle.asn1.ASN1Sequence;
 import org.bouncycastle.asn1.DERSequence;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.util.encoders.Hex;
 
 public class ECDSA {
@@ -55,7 +56,9 @@ public class ECDSA {
      * @throws Exception
      */
     public static boolean verify(String message, String signature, String publicKey) throws Exception {
-        Signature sign = Signature.getInstance("SHA256withECDSA");
+        BouncyCastleProvider bcp = new BouncyCastleProvider();
+        Security.addProvider(bcp);
+        Signature sign = Signature.getInstance("SHA256withECDSA", bcp.getName());
         ECPublicKey ecPub = null;
         ecPub = ECIES.getPublicKeyFromBytes(Hex.decode(publicKey));
         sign.initVerify(ecPub);
@@ -114,8 +117,7 @@ public class ECDSA {
     }
 
     private static ASN1Primitive toAsn1Primitive(byte[] data) throws Exception {
-        try (ByteArrayInputStream inStream = new ByteArrayInputStream(data);
-                ASN1InputStream asnInputStream = new ASN1InputStream(inStream);) {
+        try ( ByteArrayInputStream inStream = new ByteArrayInputStream(data);  ASN1InputStream asnInputStream = new ASN1InputStream(inStream);) {
             return asnInputStream.readObject();
         }
     }
