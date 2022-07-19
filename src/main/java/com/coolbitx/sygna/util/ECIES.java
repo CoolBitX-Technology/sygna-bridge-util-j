@@ -9,8 +9,10 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.PrivateKey;
 import java.security.SecureRandom;
+import java.security.Security;
 import java.security.interfaces.ECPublicKey;
 import java.security.spec.ECGenParameterSpec;
 import java.security.spec.ECParameterSpec;
@@ -18,6 +20,7 @@ import java.security.spec.ECPoint;
 import java.security.spec.ECPrivateKeySpec;
 import java.security.spec.ECPublicKeySpec;
 import java.security.spec.InvalidKeySpecException;
+import java.security.spec.InvalidParameterSpecException;
 import java.security.spec.PKCS8EncodedKeySpec;
 
 import javax.crypto.Cipher;
@@ -30,6 +33,7 @@ import javax.crypto.spec.SecretKeySpec;
 import org.bouncycastle.jcajce.provider.asymmetric.util.EC5Util;
 import org.bouncycastle.jce.ECNamedCurveTable;
 import org.bouncycastle.jce.ECPointUtil;
+import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.jce.spec.ECNamedCurveParameterSpec;
 import org.bouncycastle.jce.spec.ECNamedCurveSpec;
 
@@ -44,15 +48,16 @@ public class ECIES {
      * @throws Exception
      */
     public static String encrypt(String msg, String publicKey) throws Exception {
-        String result = null;
+        String result;
         // add provider only if it's not in the JVM
-        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+        BouncyCastleProvider bcp = new BouncyCastleProvider();
+        Security.addProvider(bcp);
+        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", bcp.getName());
         parameters.init(new ECGenParameterSpec("secp256k1"));
-
         ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
 
         // Initialise our private key:
-        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC");
+        KeyPairGenerator keyGen = KeyPairGenerator.getInstance("EC", bcp.getName());
         keyGen.initialize(ecParameterSpec, new SecureRandom());
         KeyPair keypair = keyGen.generateKeyPair();
 
@@ -61,7 +66,7 @@ public class ECIES {
         String pubkey = "04" + StringUtil.leftPadWithZeroes(ecpubkey.getW().getAffineX().toString(16), 64)
                 + StringUtil.leftPadWithZeroes(ecpubkey.getW().getAffineY().toString(16), 64);
 
-        KeyFactory kf = KeyFactory.getInstance("EC");
+        KeyFactory kf = KeyFactory.getInstance("EC", bcp.getName());
 
         // Read other's public key:
         ECPublicKey ecPub = getPublicKeyFromBytes(Hex.decode(publicKey));
@@ -71,7 +76,7 @@ public class ECIES {
         System.out.println("Uncompressed PubKey:" + fullPub);
 
         // Perform key agreement
-        KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+        KeyAgreement ka = KeyAgreement.getInstance("ECDH", bcp.getName());
         ka.init(kf.generatePrivate(new PKCS8EncodedKeySpec(keypair.getPrivate().getEncoded())));
         ka.doPhase(ecPub, true);
 
@@ -119,13 +124,15 @@ public class ECIES {
      * @throws Exception
      */
     public static String decrypt(String encryptedMsg, String privateKey) throws Exception {
-        String result = null;
-        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+        String result;
+        BouncyCastleProvider bcp = new BouncyCastleProvider();
+        Security.addProvider(bcp);
+        AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", bcp.getName());
         parameters.init(new ECGenParameterSpec("secp256k1"));
 
         ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
 
-        KeyFactory kf = KeyFactory.getInstance("EC");
+        KeyFactory kf = KeyFactory.getInstance("EC", bcp.getName());
 
         byte[] iv = ByteBuffer.allocate(16).putInt(0).array();
         IvParameterSpec ivSpec = new IvParameterSpec(iv);
@@ -143,7 +150,7 @@ public class ECIES {
         ECPoint ecPoint = new ECPoint(new BigInteger(ephemX, 16), new BigInteger(ephemY, 16));
         ECPublicKeySpec ecPub = new ECPublicKeySpec(ecPoint, ecParameterSpec);
         // Perform key agreement
-        KeyAgreement ka = KeyAgreement.getInstance("ECDH");
+        KeyAgreement ka = KeyAgreement.getInstance("ECDH", bcp.getName());
         ka.init(ecPriv);
         ka.doPhase(kf.generatePublic(ecPub), true);
 
@@ -183,17 +190,19 @@ public class ECIES {
 
     static PrivateKey getPrivateKey(byte[] privateKeyBytes) {
         try {
-            KeyFactory kf = KeyFactory.getInstance("EC");
-            AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC");
+    
+            BouncyCastleProvider bcp = new BouncyCastleProvider();
+            Security.addProvider(bcp);
+            AlgorithmParameters parameters = AlgorithmParameters.getInstance("EC", bcp.getName());
             parameters.init(new ECGenParameterSpec("secp256k1"));
 
+                    KeyFactory kf = KeyFactory.getInstance("EC", bcp.getName());
             ECParameterSpec ecParameterSpec = parameters.getParameterSpec(ECParameterSpec.class);
             BigInteger privNum = new BigInteger(1, privateKeyBytes);
             ECPrivateKeySpec ecPrivateKeySpec = new ECPrivateKeySpec(privNum, ecParameterSpec);
 
             return kf.generatePrivate(ecPrivateKeySpec);
-        } catch (Exception e) {
-            e.printStackTrace();
+        } catch (NoSuchAlgorithmException | NoSuchProviderException | InvalidKeySpecException | InvalidParameterSpecException e) {
             System.out.println(e.getClass().getSimpleName() + "occurred when trying to get private key from raw bytes\n"
                     + e.toString());
             return null;
@@ -201,9 +210,12 @@ public class ECIES {
     }
 
     static ECPublicKey getPublicKeyFromBytes(byte[] pubKey)
-            throws NoSuchAlgorithmException, InvalidKeySpecException {
+            throws NoSuchAlgorithmException, InvalidKeySpecException, NoSuchProviderException {
+                    BouncyCastleProvider bcp = new BouncyCastleProvider();
+            Security.addProvider(bcp);
+            
         ECNamedCurveParameterSpec spec = ECNamedCurveTable.getParameterSpec("secp256k1");
-        KeyFactory kf = KeyFactory.getInstance("EC");
+        KeyFactory kf = KeyFactory.getInstance("EC", bcp.getName());
         ECNamedCurveSpec params = new ECNamedCurveSpec("secp256k1", spec.getCurve(), spec.getG(), spec.getN());
         ECPoint point = ECPointUtil.decodePoint(params.getCurve(), pubKey);
         String xpub = point.getAffineX().toString(16);
