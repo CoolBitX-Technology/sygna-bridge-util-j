@@ -12,6 +12,7 @@ import com.coolbitx.sygna.bridge.model.Field;
 import com.coolbitx.sygna.config.BridgeConfig;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 
 /**
  *
